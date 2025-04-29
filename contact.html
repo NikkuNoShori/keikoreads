@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - Keiko Reads</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #e74c3c;
+            --text-color: #333;
+            --light-text: #fff;
+            --background-color: #f9f9f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #E6D7D7;
+        }
+
+        .page-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            background-image: url('library_photo.avif');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .site-logo {
+            width: 400px;
+            height: auto;
+            display: block;
+            position: relative;
+            z-index: 2;
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 20px 40px;
+            border-radius: 10px;
+        }
+
+        nav {
+            width: 100%;
+            background-color: #E6D7D7;
+            margin-top: auto;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .nav-menu li {
+            flex: 1;
+            max-width: 200px;
+            text-align: center;
+            position: relative;
+        }
+
+        .nav-menu li:not(:last-child)::after {
+            content: "•";
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #333;
+        }
+
+        .nav-menu a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding: 1rem 2rem;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+
+        .content-wrapper {
+            padding: 40px;
+            display: flex;
+            gap: 40px;
+        }
+
+        .contact-info {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .contact-info h1 {
+            color: #666;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            font-weight: normal;
+            font-style: italic;
+        }
+
+        .contact-info p {
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .social-links {
+            background-color: #f8ecec;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #333;
+            padding: 10px;
+            margin-bottom: 15px;
+            transition: background-color 0.3s ease;
+        }
+
+        .social-link:last-child {
+            margin-bottom: 0;
+        }
+
+        .social-link img, .social-link svg {
+            width: 25px;
+            height: 25px;
+            min-width: 25px;  /* Ensures consistent width */
+            margin-right: 20px;
+            object-fit: contain;  /* Ensures images maintain aspect ratio */
+        }
+
+        .social-link span {
+            font-weight: bold;
+            text-decoration: underline;
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        .contact-form {
+            flex: 1;
+            background-color: #f8ecec;
+            padding: 30px;
+            border-radius: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            background-color: white;
+        }
+
+        .form-group textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        .submit-button {
+            background-color: black;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-button:hover {
+            background-color: #333;
+        }
+
+        footer {
+            background-color: #E6D7D7;
+            color: #666;
+            text-align: center;
+            padding: 15px 0;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        footer .divider {
+            border-top: 1px solid #ccc;
+            margin: 0 auto 15px;
+            width: 90%;
+        }
+
+        footer p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <header>
+            <img src="keikoreads_alishaneal.avif" alt="Keiko Reads Logo" class="site-logo">
+            <nav>
+                <div class="nav-container">
+                    <ul class="nav-menu">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+
+        <div class="content-wrapper">
+            <div class="contact-info">
+                <h1>Connect With Me!</h1>
+                <p>Use the provided form, email me directly, or find me on my bookish socials!</p>
+                <div class="social-links">
+                    <a href="https://www.instagram.com/keikoreads/" class="social-link">
+                        <img src="IG_icon.avif" alt="Instagram">
+                        <span>Bookstagram</span>
+                    </a>
+                    <a href="mailto:your-email@example.com" class="social-link">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                            <path fill="currentColor" d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                        </svg>
+                        <span>Email</span>
+                    </a>
+                    <a href="https://www.goodreads.com/user/show/49508616-alisha-neal" class="social-link">
+                        <img src="goodreads_icon.avif" alt="Goodreads">
+                        <span>Goodreads</span>
+                    </a>
+                    <a href="https://app.thestorygraph.com/profile/keikoalisha" class="social-link">
+                        <img src="storygraph_icon.avif" alt="StoryGraph">
+                        <span>Storygraph</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="contact-form">
+                <form action="#" method="POST">
+                    <div class="form-group">
+                        <label for="name">Name *</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message *</label>
+                        <textarea id="message" name="message" required></textarea>
+                    </div>
+                    <button type="submit" class="submit-button">Submit</button>
+                </form>
+            </div>
+        </div>
+
+        <footer>
+            <div class="divider"></div>
+            <p>© 2025 by Alisha Neal</p>
+        </footer>
+    </div>
+</body>
+</html> 
