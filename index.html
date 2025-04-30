@@ -55,20 +55,19 @@
         }
 
         .site-logo {
-            width: 400px;
+            width: 300px;
             height: auto;
             display: block;
             position: relative;
             z-index: 2;
-            background-color: rgba(255, 255, 255, 0.95);
-            padding: 20px 40px;
-            border-radius: 10px;
         }
 
         nav {
             width: 100%;
-            background-color: #E6D7D7;
+            background-color: white;
             margin-top: auto;
+            border-top: 2px solid #E6D7D7;
+            border-bottom: 2px solid #E6D7D7;
         }
 
         .nav-container {
@@ -109,7 +108,7 @@
             color: var(--text-color);
             text-decoration: none;
             font-size: 1.1rem;
-            padding: 1rem 2rem;
+            padding: 0.5rem 2rem;
             display: block;
             transition: background-color 0.3s ease;
         }
@@ -137,7 +136,7 @@
         }
 
         .welcome-box {
-            background-color: #f8ecec;
+            background-color: #E6D7D7;
             padding: 20px;
             border-radius: 8px;
             text-align: center;
@@ -172,27 +171,30 @@
             max-width: 50%;
             margin: 0 auto 20px;  /* Center horizontally and keep bottom margin */
             display: block;
+            position: relative;
         }
 
         .review-card img {
             width: 100%;
             height: auto;
-            border-radius: 8px 8px 0 0;
+            border-radius: 8px;
             display: block;
         }
 
         .review-info {
-            background: #A9A9A9;
+            background: rgba(169, 169, 169, 0.9);
             padding: 12px;
-            position: relative;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
             z-index: 1;
             transition: background-color 0.3s ease;
-            margin-top: 0;
             border-radius: 0 0 8px 8px;
         }
 
         .review-card:hover .review-info {
-            background: #8B8B8B;
+            background: rgba(139, 139, 139, 0.95);
         }
 
         .review-info h3 {
@@ -231,14 +233,30 @@
         .social-icons {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            align-items: center;
+            gap: 10px;
             margin-bottom: 20px;
+            background-color: #E6D7D7;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .social-icons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 0;
         }
 
         .social-icons img {
             width: 35px;
             height: 35px;
             transition: transform 0.3s ease;
+            display: block;
         }
 
         .social-icons img:hover {
@@ -246,7 +264,8 @@
         }
 
         .netgalley-badge {
-            width: 120px;
+            width: 180px;
+            height: auto;
             margin: 15px auto;
         }
 
@@ -380,12 +399,18 @@
             gap: 20px;
         }
 
+        .divider {
+            border-top: 1px solid #ccc;
+            margin: 40px auto;
+            width: 90%;
+        }
+
     </style>
 </head>
 <body>
     <div class="page-container">
         <header>
-            <img src="keikoreads_alishaneal.avif" alt="Keiko Reads Logo" class="site-logo">
+            <img src="Keiko_Reads_3.png" alt="Keiko Reads Logo" class="site-logo">
             <nav>
                 <div class="nav-container">
                     <ul class="nav-menu">
