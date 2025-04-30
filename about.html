@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Keiko Reads</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #e74c3c;
+            --text-color: #333;
+            --light-text: #fff;
+            --background-color: #f9f9f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #E6D7D7;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-image: url('library_photo.avif');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .site-logo {
+            width: 120px;
+            height: auto;
+            display: block;
+            position: relative;
+            z-index: 2;
+        }
+
+        nav {
+            width: 100%;
+            background-color: white;
+            margin-top: auto;
+            margin-bottom: 20px;
+            border-top: 1px solid #E6D7D7;
+            border-bottom: 1px solid #E6D7D7;
+            padding: 2px 0;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .nav-menu li {
+            flex: 1;
+            max-width: 150px;
+            text-align: center;
+            position: relative;
+        }
+
+        .nav-menu li:not(:last-child)::after {
+            content: "•";
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #333;
+        }
+
+        .nav-menu a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 1rem;
+            padding: 0.2rem 1.5rem;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            padding: 40px 40px 15px 40px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            min-height: 0;
+        }
+
+        .about-content {
+            flex: 3;
+            max-width: 450px;
+        }
+
+        h1 {
+            color: #666;
+            font-size: 1.6rem;
+            margin-bottom: 12px;
+            font-weight: normal;
+        }
+
+        .about-content p {
+            margin-bottom: 10px;
+            font-size: 0.75rem;
+            color: #333;
+            line-height: 1.2;
+        }
+
+        .about-image {
+            flex: 2;
+            width: 60%;
+            margin-left: auto;
+        }
+
+        .about-image img {
+            width: 100%;
+            height: auto;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        footer {
+            background-color: #E6D7D7;
+            color: #666;
+            text-align: center;
+            padding: 8px 0;
+            font-size: 0.8rem;
+            margin-top: auto;
+        }
+
+        footer .divider {
+            border-top: 1px solid #ccc;
+            margin: 0 auto 8px;
+            width: 90%;
+        }
+
+        footer p {
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-container">
+        <header>
+            <img src="Keiko_Reads_3.png" alt="Keiko Reads Logo" class="site-logo">
+            <nav>
+                <div class="nav-container">
+                    <ul class="nav-menu">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+
+        <div class="content-wrapper">
+            <div class="about-content">
+                <h1>About Me</h1>
+                <p>Hey there! I'm Alisha Neal—a book lover, ARC reviewer, and the voice behind this cozy little corner
+                    of the internet. I created this site as a home base for my book reviews, especially for the amazing
+                    publishers I work with through NetGalley.</p>
+
+                <p>I read everything—seriously, all genres are fair game—but I have a soft spot for anything Fantasy or
+                    Horror. Give me magic, monsters, or a little bit of both, and I'm in heaven.</p>
+
+                <p>When I'm not buried in a book, you'll find me hanging out with my husband, chasing after our son, or
+                    snuggling up with our dog and cat (they're both professional napping assistants).</p>
+
+                <p>Thanks for stopping by! Whether you're a fellow reader, a publisher, or just curious about my latest
+                    reads, I'm glad you're here.</p>
+            </div>
+
+            <div class="about-image">
+                <img src="bookStack.png" alt="Stack of Books" class="profile-image">
+            </div>
+        </div>
+
+        <footer>
+            <div class="divider"></div>
+            <p>© 2025 by Alisha Neal</p>
+        </footer>
+    </div>
+</body>
+
+</html>
