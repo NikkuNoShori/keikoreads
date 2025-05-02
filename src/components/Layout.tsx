@@ -3,17 +3,19 @@ import { Header } from './Header';
 
 interface LayoutProps {
   children: ReactNode;
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
 }
 
-export const Layout = ({ children }: LayoutProps) => {
+export const Layout = ({ children, isDarkMode, toggleDarkMode }: LayoutProps) => {
   return (
-    <div className="bg-rose-gold min-h-screen flex flex-col">
-      <div className="container mx-auto max-w-4xl bg-white shadow-lg min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 p-10 flex flex-col gap-5 min-h-0">
+    <div className="bg-rose-gold dark:bg-maroon-outer min-h-screen flex flex-col">
+      <div className="container mx-auto max-w-4xl bg-white dark:bg-maroon-container shadow-lg min-h-screen flex flex-col">
+        <Header isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
+        <main className="flex-1 p-10 flex flex-col gap-5 min-h-0 text-gray-900 dark:text-maroon-text">
           {children}
         </main>
-        <footer className="footer bg-rose-gold text-gray-600 text-center py-2 text-sm mt-auto">
+        <footer className="footer bg-rose-gold dark:bg-gray-800 text-gray-600 dark:text-maroon-text text-center py-2 text-sm mt-auto">
           <div className="divider"></div>
           <p>&copy; 2024 Keiko Reads. All rights reserved.</p>
         </footer>

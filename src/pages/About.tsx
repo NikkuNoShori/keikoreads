@@ -1,3 +1,5 @@
+import ParticlesBg from 'particles-bg';
+
 export const About = () => {
   return (
     <div className="w-full">

@@ -19,9 +19,11 @@
 ---
 
 ## Phase 3: Routing & Navigation
-- [ ] **3.1** Centralize all routes in a single file (e.g., `src/routes.tsx`).
+- [x] **3.1** Centralize all routes in a single file (e.g., `src/routes.tsx`).
 - [ ] **3.2** Replace all internal `<a>` tags with `<Link>` from `react-router-dom`.
+  - **Note:** Most navigation uses `<Link>`, but the 404 page in `routes.tsx` still uses `<a href="/">`.
 - [ ] **3.3** Ensure all navigation and page links work correctly.
+  - **Note:** Navigation is mostly correct, but some review/social links are external and should remain `<a>`. Internal links should use `<Link>`.
 
 ---
 
@@ -33,9 +35,12 @@
 ---
 
 ## Phase 5: Theming & Background
-- [ ] **5.1** Integrate a rose-gold particles background using a React library (e.g., `react-tsparticles`).
+- [x] **5.1** Integrate a rose-gold particles background using a React library (e.g., `react-tsparticles`).
+  - **Note:** Attempted and then removed at your request.
 - [ ] **5.2** Ensure the background and theme are consistent across all pages.
+  - **Note:** Rose-gold background color is present, but not particles.
 - [ ] **5.3** Polish and finalize dark mode support.
+  - **Note:** Dark mode toggle exists, but may need final review.
 
 ---
 
@@ -54,6 +59,7 @@
 ## Phase 7: Centralized Utilities
 - [ ] **7.1** Implement a centralized logger utility (type-safe, browser console notifications).
 - [ ] **7.2** Add a global error boundary for catching and displaying errors.
+  - **Note:** ErrorBoundary exists in `main.tsx`, but may need review.
 - [ ] **7.3** Centralize type definitions and dependency management.
 
 ---

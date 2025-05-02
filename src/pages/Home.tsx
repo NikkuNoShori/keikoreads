@@ -7,7 +7,7 @@ export const Home = () => {
         {/* Left Column */}
         <div className="flex flex-col gap-6 mt-10 w-full">
           {/* Welcome Box */}
-          <div className="bg-[#E6D7D7] p-6 rounded-lg text-center shadow">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg text-center shadow dark:text-maroon-text">
             <h2 className="mb-2 text-xl font-semibold">Hi friend!</h2>
             <p className="m-0 leading-relaxed text-base">
               Welcome to my cozy reading nook on the web. I review advance reader copies (ARCs) from NetGalley and share all the bookish feels—whether it's swooning over a new romance, getting lost in a twisty thriller, or curling up with a heartwarming story. Grab a blanket, make some tea, and let's chat about books!
@@ -16,7 +16,7 @@ export const Home = () => {
           {/* Social Section */}
           <div className="text-center">
             <h2 className="text-lg text-gray-700 mb-3 font-normal">Social Media</h2>
-            <div className="flex justify-center items-center gap-3 mb-5 bg-[#E6D7D7] p-3 rounded-lg shadow w-fit mx-auto">
+            <div className="flex justify-center items-center gap-3 mb-5 bg-[#E6D7D7] dark:bg-gray-800 p-3 rounded-lg shadow w-fit mx-auto dark:text-maroon-text">
               <a href="https://www.instagram.com/keikoreads/" target="_blank" rel="noopener noreferrer">
                 <img src="/assets/IG_icon.avif" alt="Instagram" className="w-7 h-7" />
               </a>
@@ -62,7 +62,7 @@ export const Home = () => {
       {/* Divider */}
       <div className="border-t border-gray-300 my-8 w-11/12 mx-auto" />
       {/* NetGalley Section */}
-      <div className="bg-white p-6 pb-10 text-center mt-0 rounded-lg shadow">
+      <div className="bg-white dark:bg-maroon-container p-6 pb-10 text-center mt-0 rounded-lg shadow dark:text-maroon-text">
         <h2 className="text-2xl text-gray-700 mb-6 font-normal">What is NetGalley?</h2>
         <div className="max-w-2xl mx-auto relative pb-[42.1875%] h-0 overflow-hidden">
           <iframe
