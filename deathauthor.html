@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Death of the Author - Book Review | Keiko Reads</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #e74c3c;
+            --text-color: #333;
+            --light-text: #fff;
+            --background-color: #f9f9f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #E6D7D7;
+        }
+
+        .page-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            background-image: url('library_photo.avif');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .site-logo {
+            width: 150px;
+            height: auto;
+            display: block;
+            position: relative;
+            z-index: 2;
+        }
+
+        nav {
+            width: 100%;
+            background-color: white;
+            margin-top: auto;
+            border-top: 1px solid #E6D7D7;
+            border-bottom: 1px solid #E6D7D7;
+            padding: 2px 0;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .nav-menu li {
+            flex: 1;
+            max-width: 150px;
+            text-align: center;
+            position: relative;
+        }
+
+        .nav-menu li:not(:last-child)::after {
+            content: "•";
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #333;
+        }
+
+        .nav-menu a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 1rem;
+            padding: 0.2rem 1.5rem;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+
+        .content-wrapper {
+            padding: 20px;
+            display: flex;
+            gap: 30px;
+        }
+
+        .book-info {
+            flex: 1;
+            max-width: 250px;
+        }
+
+        .book-cover {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .book-details {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .book-details h2 {
+            color: #666;
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            font-weight: normal;
+        }
+
+        .book-details p {
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .book-details .label {
+            font-weight: bold;
+            color: #444;
+        }
+
+        .rating {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .rating h3 {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .stars {
+            color: #e74c3c;
+            font-size: 1.3rem;
+            letter-spacing: 3px;
+        }
+
+        .review-content {
+            flex: 2;
+        }
+
+        .book-description {
+            background-color: #E6D7D7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-style: italic;
+            line-height: 1.4;
+            font-size: 0.75rem;
+        }
+
+        .review-divider {
+            border: none;
+            border-top: 2px solid #E6D7D7;
+            margin: 15px 0;
+            width: 100%;
+        }
+
+        .netgalley-thanks {
+            text-align: center;
+            color: #666;
+            margin: 15px 0;
+            font-size: 0.85rem;
+        }
+
+        .review-text {
+            color: #666;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .review-text p {
+            margin-bottom: 12px;
+        }
+
+        .book-links {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 15px 0;
+        }
+
+        .book-link {
+            background-color: #A9A9A9;
+            color: black;
+            padding: 6px 12px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+
+        .read-alikes-section {
+            background-color: #E6D7D7;
+            padding: 20px;
+            margin-top: 0;
+        }
+
+        .read-alikes-container {
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        .read-alikes-header {
+            text-align: center;
+            color: #666;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            font-weight: normal;
+        }
+
+        .recommendations {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .book-recommendation {
+            background-color: white;
+            padding: 12px;
+            border-radius: 8px;
+            width: 220px;
+            text-align: center;
+        }
+
+        .book-recommendation img {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .book-recommendation a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.85rem;
+            display: block;
+            line-height: 1.2;
+        }
+
+        footer {
+            background-color: #E6D7D7;
+            color: #666;
+            text-align: center;
+            padding: 15px 0;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        footer .divider {
+            border-top: 1px solid #ccc;
+            margin: 0 auto 15px;
+            width: 90%;
+        }
+
+        footer p {
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-container">
+        <header>
+            <img src="Keiko_Reads_3.png" alt="Keiko Reads Logo" class="site-logo">
+            <nav>
+                <div class="nav-container">
+                    <ul class="nav-menu">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+
+        <div class="content-wrapper">
+            <aside class="book-info">
+                <img src="DotA.avif" alt="Death of the Author Book Cover" class="book-cover">
+                <div class="book-details">
+                    <h2>Book Details</h2>
+                    <p><span class="label">Author:</span> Nnedi Okorafor</p>
+                    <p><span class="label">Published:</span> January 14, 2025</p>
+                    <p><span class="label">Genre:</span> Science Fiction, Contemporary, Literary Fiction</p>
+                    <p><span class="label">Pages:</span> 448</p>
+                    <p><span class="label">Format:</span> eARC</p>
+                    <p><span class="label">Source:</span> Netgalley</p>
+                </div>
+                <div class="rating">
+                    <h3>Rating</h3>
+                    <div class="stars">★★★★☆</div>
+                    <p>4.5 out of 5</p>
+                </div>
+            </aside>
+
+            <main class="review-content">
+                <div class="book-description">
+                    <p>The future of storytelling is here.</p>
+                    <p>Life has thrown Zelu some curveballs over the years, but when she's suddenly dropped from her
+                        university job and her latest novel is rejected, all in the middle of her sister's wedding, her
+                        life is upended. Disabled, unemployed and from a nosy, high-achieving, judgmental family, she's
+                        not sure what comes next.</p>
+                    <p>In her hotel room that night, she takes the risk that will define her life - she decides to write
+                        a book VERY unlike her others. A science fiction drama about androids and AI after the
+                        extinction of humanity. And everything changes.</p>
+                    <p>What follows is a tale of love and loss, fame and infamy, of extraordinary events in one world,
+                        and another. And as Zelu's life evolves, the lines between fiction and reality begin to blur.
+                    </p>
+                    <p>Because sometimes a story really does have the power to reshape the world.</p>
+                </div>
+
+                <hr class="review-divider">
+
+                <div class="netgalley-thanks">
+                    Thank you to Netgalley and the publisher for providing this ARC in exchange for an honest review!
+                </div>
+
+                <div class="review-text">
+                    <p>4.5 stars! This book BLEW ME AWAY. There's so many layers in this novel; the author did such a
+                        good job integrating everything together. This is an amazing book that highlights the pros and
+                        cons of AI. The dealing with trauma, the family obligations and dynamics. The sharing and
+                        education on Nigerian culture; I truly learned a lot from this novel. The characters are
+                        INSANELY complex and well written. Told from the POV of a Nigerian American paraplegic, who is
+                        also an author, and how her life is surrounding her disability, how she grows and heals. This
+                        was just an all around amazing book. The only reason it's not 5 stars is it did have some
+                        dragging moments that probably could've been omitted in my opinion, but that was the only issue
+                        I had while reading this. I love love LOVED this and can't wait to read more by this author!</p>
+                </div>
+
+                <div
+                    style="text-align: center; color: #666; font-style: italic; font-size: 0.85rem; margin: 20px 0 10px;">
+                    Date posted: April 08, 2025
+                </div>
+
+                <div class="book-links">
+                    <a href="https://www.goodreads.com/book/show/214283593-death-of-the-author"
+                        class="book-link">Goodreads</a>
+                    <a href="https://app.thestorygraph.com/books/001a9684-d64f-406d-928e-9a68bb24513b"
+                        class="book-link">Storygraph</a>
+                    <a href="https://bookshop.org/p/books/death-of-the-author-nnedi-okorafor/21679951?ean=9780063391147"
+                        class="book-link">Bookshop.org</a>
+                    <a href="https://www.barnesandnoble.com/w/death-of-the-author-nnedi-okorafor/1145694342"
+                        class="book-link">Barnes & Noble</a>
+                </div>
+            </main>
+        </div>
+
+        <div class="read-alikes-section">
+            <div class="read-alikes-container">
+                <h2 class="read-alikes-header">Read Alikes</h2>
+                <div class="recommendations">
+                    <div class="book-recommendation">
+                        <img src="DotA.avif" alt="Dead in Long Beach, California Cover">
+                        <a href="https://www.goodreads.com/book/show/127282888-dead-in-long-beach-california">Dead in
+                            Long Beach, California by Venita Blackburn</a>
+                    </div>
+                    <div class="book-recommendation">
+                        <img src="DotA.avif" alt="Erasure Cover">
+                        <a href="https://www.goodreads.com/book/show/355862.Erasure">Erasure by Percival Everett</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="divider"></div>
+            <p>© 2025 by Alisha Neal</p>
+        </footer>
+    </div>
+</body>
+
+</html>

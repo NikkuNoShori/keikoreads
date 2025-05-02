@@ -1,0 +1,26 @@
+_format_version: "1.1"
+
+services:
+  - name: auth-service
+    url: http://auth:9999
+    routes:
+      - name: auth-route
+        paths:
+          - /auth
+    plugins:
+      - name: cors
+
+  - name: rest-service
+    url: http://rest:3000
+    routes:
+      - name: rest-route
+        paths:
+          - /rest/v1
+    plugins:
+      - name: cors
+
+consumers:
+  - username: anon
+    custom_id: anon
+    keyauth_credentials:
+      - key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4bmJ2aW1zbGdxd3lvYmZycnN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYyMTc2MTIsImV4cCI6MjA2MTc5MzYxMn0.KvFRUzBW1aGPU3CvgMjESIvaBUG13ng_7kOmxkyJ_Po 

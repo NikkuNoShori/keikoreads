@@ -29,7 +29,8 @@ export const Header = ({ isDarkMode, toggleDarkMode }: HeaderProps) => {
               <Link
                 to={
                   label === 'Home'
-                    ? '/' : `/${label.toLowerCase()}`
+                    ? '/' 
+                    : `/${label.toLowerCase()}`
                 }
                 className="text-gray-700 dark:text-maroon-text no-underline text-base py-1 px-6 block hover:text-rose-600 dark:hover:text-rose-300 transition-colors duration-300"
               >

@@ -1,0 +1,16 @@
+version: '3'
+services:
+  postgres:
+    image: pgvector/pgvector:pg14 # This image includes the pgvector extension
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=u58HwyQwS6LsT4hz
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    command: ["postgres", "-c", "shared_preload_libraries=vector"]
+
+volumes:
+  postgres-data: 
