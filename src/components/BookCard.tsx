@@ -30,11 +30,11 @@ export const BookCard = ({ book }: BookCardProps) => {
   return (
     <div className="bg-white dark:bg-maroon-container rounded-lg shadow-md overflow-hidden flex flex-col h-full transition-transform duration-300 hover:shadow-lg group relative">
       {/* Cover Image */}
-      <div className="relative h-96 overflow-hidden">
+      <div className="relative h-[28rem] overflow-hidden bg-white dark:bg-maroon-container">
         <img 
           src={coverImage} 
           alt={`${book.title} cover`} 
-          className="w-full h-96 object-contain object-top bg-white"
+          className="w-full h-[28rem] object-contain object-top bg-white dark:bg-maroon-container"
           onError={(e) => {
             e.currentTarget.src = '/assets/book-placeholder.jpg';
           }}

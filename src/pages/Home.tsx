@@ -1,81 +1,75 @@
 import { SmartLink } from '../components/SmartLink';
+import { useBooks } from '../hooks/useBooks';
+import { BookCard } from '../components/BookCard';
 // import React from 'react';
 
 export const Home = () => {
+  const { books, loading } = useBooks('review_date', 'desc', undefined, 1, 3);
   return (
-    <div className="w-full max-w-5xl mx-auto px-4">
-      <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] gap-10 mb-6">
-        {/* Left Column */}
-        <div className="flex flex-col gap-6 mt-10 w-full">
-          {/* Welcome Box */}
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg text-center shadow dark:text-maroon-text">
-            <h2 className="mb-2 text-xl font-semibold">Hi friend!</h2>
-            <p className="m-0 leading-relaxed text-base">
-              Welcome to my cozy reading nook on the web. I review advance reader copies (ARCs) from NetGalley and share all the bookish feels—whether it's swooning over a new romance, getting lost in a twisty thriller, or curling up with a heartwarming story. Grab a blanket, make some tea, and let's chat about books!
-            </p>
-          </div>
-          {/* Social Section */}
-          <div className="text-center">
-            <h2 className="text-lg text-gray-700 mb-3 font-normal">Social Media</h2>
-            <div className="flex justify-center items-center gap-3 mb-5 bg-[#E6D7D7] dark:bg-gray-800 p-3 rounded-lg shadow w-fit mx-auto dark:text-maroon-text">
-              <SmartLink to="https://www.instagram.com/keikoreads/">
-                <img src="/assets/IG_icon.avif" alt="Instagram" className="w-7 h-7" />
-              </SmartLink>
-              <SmartLink to="https://app.thestorygraph.com/profile/keikoalisha">
-                <img src="/assets/storygraph_icon.avif" alt="StoryGraph" className="w-7 h-7" />
-              </SmartLink>
-              <SmartLink to="https://www.goodreads.com/user/show/49508616-alisha-neal">
-                <img src="/assets/goodreads_icon.avif" alt="Goodreads" className="w-7 h-7" />
-              </SmartLink>
+    <div className="w-full flex justify-center items-start bg-rose-gold dark:bg-maroon-outer">
+      {/* Center container with 25% background visible on each side */}
+      <div className="w-full max-w-[1600px] mx-auto px-8 py-8 bg-white dark:bg-maroon-container shadow-lg rounded-xl flex flex-col">
+        {/* Grid: 2 columns, left col 1 row (flex-col, top-aligned), right col 3 rows */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+          {/* Left Column: flex-col container, top-aligned, horizontally centered */}
+          <div className="flex flex-col items-center justify-start w-full">
+            <img
+              src="/assets/keiko_Reads_2.png"
+              alt="Keiko Reads Profile"
+              className="w-72 h-72 rounded-full object-cover border-4 border-rose-300 shadow-lg mb-4"
+            />
+            <div className="bg-white dark:bg-gray-800 py-4 px-4 rounded-lg text-center shadow dark:text-maroon-text w-full flex flex-col justify-center min-h-[120px] max-w-md mx-auto mb-4">
+              <h2 className="mb-1 text-2xl font-semibold">Hi friend!</h2>
+              <p className="m-0 leading-relaxed text-base flex-1 flex items-center justify-center">
+                Welcome to my cozy reading nook on the web. I review advance reader copies (ARCs) from NetGalley and share all the bookish feels—whether it's swooning over a new romance, getting lost in a twisty thriller, or curling up with a heartwarming story. Grab a blanket, make some tea, and let's chat about books!
+              </p>
             </div>
-            <img src="/assets/netgalley.avif" alt="NetGalley Member" className="w-44 h-auto mx-auto my-2" />
-          </div>
-        </div>
-        {/* Reviews Section */}
-        <div className="text-center w-full">
-          <h1 className="text-2xl text-gray-600 mb-6 font-normal">Reviews</h1>
-          <div className="flex flex-col gap-8 items-center">
-            {/* Review Card 1 */}
-            <div className="w-full max-w-xs relative group">
-              <SmartLink to="#" className="block">
-                <img src="/assets/WSM.avif" alt="Where Shadows Meet" className="w-full h-auto rounded-lg shadow-lg" />
-                <div className="bg-gray-400/95 p-4 absolute bottom-0 left-0 right-0 rounded-b-lg transition-all duration-300 h-1/4 flex flex-col justify-center group-hover:h-1/2 group-hover:bg-gray-500/95">
-                  <h3 className="text-white text-lg m-0 transition-all">Where Shadows Meet</h3>
-                  <p className="text-white/90 text-base m-0">Patrice Caldwell</p>
-                  <p className="text-white/80 text-sm m-0">April 22, 2025</p>
-                </div>
-              </SmartLink>
-            </div>
-            {/* Review Card 2 */}
-            <div className="w-full max-w-xs relative group">
-              <SmartLink to="#" className="block">
-                <img src="/assets/DotA.avif" alt="Death of the Author" className="w-full h-auto rounded-lg shadow-lg" />
-                <div className="bg-gray-400/95 p-4 absolute bottom-0 left-0 right-0 rounded-b-lg transition-all duration-300 h-1/4 flex flex-col justify-center group-hover:h-1/2 group-hover:bg-gray-500/95">
-                  <h3 className="text-white text-lg m-0 transition-all">Death of the Author</h3>
-                  <p className="text-white/90 text-base m-0">Nnedi Okorafor</p>
-                  <p className="text-white/80 text-sm m-0">April 8th, 2025</p>
-                </div>
-              </SmartLink>
+            <div className="flex flex-col items-center w-full">
+              <h2 className="text-2xl text-gray-700 mb-1 font-normal">Social Media</h2>
+              <div className="flex justify-center items-center gap-4 bg-[#E6D7D7] dark:bg-gray-800 p-2 rounded-lg shadow w-fit dark:text-maroon-text mb-2">
+                <SmartLink to="https://www.instagram.com/keikoreads/">
+                  <img src="/assets/IG_icon.avif" alt="Instagram" className="w-12 h-12" />
+                </SmartLink>
+                <SmartLink to="https://app.thestorygraph.com/profile/keikoalisha">
+                  <img src="/assets/storygraph_icon.avif" alt="StoryGraph" className="w-12 h-12" />
+                </SmartLink>
+                <SmartLink to="https://www.goodreads.com/user/show/49508616-alisha-neal">
+                  <img src="/assets/goodreads_icon.avif" alt="Goodreads" className="w-12 h-12" />
+                </SmartLink>
+              </div>
+              <img
+                src="/assets/netgalley.avif"
+                alt="NetGalley Member"
+                className="w-32 h-auto rounded-lg border border-gray-200 bg-white p-1 drop-shadow-lg mt-1"
+              />
             </div>
           </div>
-        </div>
-      </div>
-      {/* Divider */}
-      <div className="border-t border-gray-300 my-8 w-11/12 mx-auto" />
-      {/* NetGalley Section */}
-      <div className="bg-white dark:bg-maroon-container p-6 pb-10 text-center mt-0 rounded-lg shadow dark:text-maroon-text">
-        <h2 className="text-2xl text-gray-700 mb-6 font-normal">What is NetGalley?</h2>
-        <div className="max-w-2xl mx-auto relative pb-[42.1875%] h-0 overflow-hidden">
-          <iframe
-            src="https://www.youtube.com/embed/IKLQSQ2Pxyk?si=GDXnR1rgcCYNZCxy"
-            title="Welcome to NetGalley"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="absolute top-0 left-0 w-full h-full border-0"
-          />
+          {/* Right Column: 3 rows */}
+          <div className="grid grid-rows-3 gap-4 w-full">
+            {/* Row 1: Latest Reviews */}
+            <div className="flex flex-col items-center justify-center w-full">
+              <h1 className="text-2xl text-gray-600 mb-1 font-normal text-center w-full">Latest Reviews</h1>
+              <div className="flex gap-4 overflow-x-auto pb-0 px-0 scrollbar-thin scrollbar-thumb-rose-300 scrollbar-track-gray-100 items-center justify-center w-full">
+                {loading ? (
+                  <div className="text-center w-full">Loading...</div>
+                ) : books.length === 0 ? (
+                  <div className="text-center w-full">No reviews found.</div>
+                ) : (
+                  books.map((book) => (
+                    <div key={book.id} className="min-w-[340px] max-w-md flex-shrink-0 flex items-center justify-center">
+                      <BookCard book={book} />
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+            {/* Row 2: Reserved for future content */}
+            <div className="flex items-center justify-center w-full"></div>
+            {/* Row 3: Reserved for future content */}
+            <div className="flex items-center justify-center w-full"></div>
+          </div>
         </div>
       </div>
-      {/* Footer handled by Layout */}
     </div>
   );
 }; 
