@@ -27,13 +27,13 @@ export const BookCard = ({ book }: BookCardProps) => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col h-full transition-transform duration-300 hover:shadow-lg">
+    <div className="bg-white dark:bg-maroon-container rounded-lg shadow-md overflow-hidden flex flex-col h-full transition-transform duration-300 hover:shadow-lg group relative">
       {/* Cover Image */}
-      <div className="relative h-56 overflow-hidden">
+      <div className="relative h-96 overflow-hidden">
         <img 
           src={coverImage} 
           alt={`${book.title} cover`} 
-          className="w-full h-full object-cover"
+          className="w-full h-96 object-contain object-top bg-white"
           onError={(e) => {
             e.currentTarget.src = '/assets/book-placeholder.jpg';
           }}
@@ -43,51 +43,22 @@ export const BookCard = ({ book }: BookCardProps) => {
             {book.genre}
           </span>
         )}
-      </div>
-      
-      {/* Book Info */}
-      <div className="p-4 flex-grow flex flex-col">
-        <h2 className="text-xl font-semibold line-clamp-2 mb-1">{book.title}</h2>
-        <p className="text-gray-600 dark:text-gray-300 text-sm mb-2">
-          by {book.author}
-          {book.series && <span className="italic"> ({book.series})</span>}
-        </p>
-        
-        {/* Rating */}
-        <div className="flex items-center mb-3">
-          {renderStars(book.rating)}
-          <span className="ml-1 text-sm text-gray-500 dark:text-gray-400">
-            ({book.rating}/5)
-          </span>
-        </div>
-        
-        {/* Description */}
-        {book.description && (
-          <p className="text-gray-700 dark:text-gray-200 text-sm line-clamp-3 mb-3">
-            {book.description}
-          </p>
-        )}
-        
-        {/* Metadata */}
-        <div className="mt-auto space-y-1 text-xs text-gray-500 dark:text-gray-400">
+        {/* Overlay info section, contained within the image area */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gray-400/95 p-3 rounded-b-lg transition-all duration-300 flex flex-col justify-center group-hover:bg-gray-500/95">
+          <h2 className="text-lg font-semibold text-white mb-0 line-clamp-2">
+            <Link to={`/reviews/${book.id}`} className="hover:underline">
+              {book.title}
+            </Link>
+          </h2>
+          <p className="text-white/90 text-xs mb-0">by {book.author}{book.series && <span className="italic"> ({book.series})</span>}</p>
+          <div className="flex items-center justify-center mb-0 mt-1">
+            {renderStars(book.rating)}
+            <span className="ml-1 text-xs text-white/80">({book.rating}/5)</span>
+          </div>
           {book.review_date && (
-            <p>Reviewed: {formatDate(book.review_date)}</p>
+            <p className="text-white/70 text-xs mt-1 mb-0">Reviewed: {formatDate(book.review_date)}</p>
           )}
-          {book.publish_date && (
-            <p>Published: {formatDate(book.publish_date)}</p>
-          )}
-          {book.pages && <p>Pages: {book.pages}</p>}
         </div>
-      </div>
-      
-      {/* Card Footer */}
-      <div className="p-4 pt-0 mt-2">
-        <Link 
-          to={`/reviews/${book.id}`} 
-          className="inline-block w-full text-center py-2 px-4 bg-rose-600 hover:bg-rose-700 text-white rounded transition-colors"
-        >
-          Read Review
-        </Link>
       </div>
     </div>
   );

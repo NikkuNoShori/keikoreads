@@ -37,53 +37,53 @@ export const BookDetail = () => {
   if (error || !book) return <div className="text-center py-10 text-red-600">{error || 'Book not found.'}</div>;
 
   return (
-    <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden mt-8">
+    <div className="max-w-4xl mx-auto bg-white dark:bg-maroon-container shadow-lg rounded-lg overflow-hidden mt-8">
       <div className="flex flex-col md:flex-row gap-8 p-8">
         {/* Book Info Sidebar */}
         <aside className="book-info flex-shrink-0 w-full md:w-64">
-          <img src={book.cover_image || '/assets/book-placeholder.jpg'} alt="Book Cover" className="book-cover w-full rounded-lg shadow mb-6" />
-          <div className="book-details bg-gray-50 rounded-lg p-4 mb-4">
-            <h2 className="text-lg font-semibold mb-2">Book Details</h2>
-            <p><span className="font-bold">Author:</span> {book.author}</p>
-            {book.series && <p><span className="font-bold">Series:</span> {book.series}</p>}
-            {book.genre && <p><span className="font-bold">Genre:</span> {book.genre}</p>}
-            {book.publish_date && <p><span className="font-bold">Published:</span> {book.publish_date.slice(0, 4)}</p>}
-            {book.pages && <p><span className="font-bold">Pages:</span> {book.pages}</p>}
+          <img src={book.cover_image || '/assets/book-placeholder.jpg'} alt="Book Cover" className="book-cover w-full rounded-lg shadow mb-6 bg-white dark:bg-gray-800" />
+          <div className="book-details bg-gray-50 dark:bg-gray-900 rounded-lg p-4 mb-4">
+            <h2 className="text-lg font-semibold mb-2 text-gray-700 dark:text-maroon-text">Book Details</h2>
+            <p className="text-gray-700 dark:text-maroon-text"><span className="font-bold">Author:</span> {book.author}</p>
+            {book.series && <p className="text-gray-700 dark:text-maroon-text"><span className="font-bold">Series:</span> {book.series}</p>}
+            {book.genre && <p className="text-gray-700 dark:text-maroon-text"><span className="font-bold">Genre:</span> {book.genre}</p>}
+            {book.publish_date && <p className="text-gray-700 dark:text-maroon-text"><span className="font-bold">Published:</span> {book.publish_date.slice(0, 4)}</p>}
+            {book.pages && <p className="text-gray-700 dark:text-maroon-text"><span className="font-bold">Pages:</span> {book.pages}</p>}
           </div>
-          <div className="rating bg-gray-100 rounded-lg p-4 text-center mb-4">
-            <h3 className="text-base font-semibold mb-2">Rating</h3>
+          <div className="rating bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-center mb-4">
+            <h3 className="text-base font-semibold mb-2 text-gray-700 dark:text-maroon-text">Rating</h3>
             <div className="text-rose-600 text-xl mb-1">
               {'★'.repeat(book.rating)}{'☆'.repeat(5 - book.rating)}
             </div>
-            <p className="text-gray-700">{book.rating} out of 5</p>
+            <p className="text-gray-700 dark:text-maroon-text">{book.rating} out of 5</p>
           </div>
         </aside>
         {/* Main Content */}
         <main className="flex-1">
-          <div className="book-description bg-rose-50 p-6 rounded-lg mb-6 italic text-gray-700">
+          <div className="book-description bg-rose-50 dark:bg-gray-900 p-6 rounded-lg mb-6 italic text-gray-700 dark:text-maroon-text">
             {book.description}
           </div>
-          <hr className="border-t-2 border-rose-100 my-6" />
-          <div className="text-center text-gray-500 mb-4 text-sm italic">Thank you to Netgalley and the publisher for providing this ARC in exchange for an honest review!</div>
-          <div className="review-text text-gray-700 mb-6">
+          <hr className="border-t-2 border-rose-100 dark:border-gray-700 my-6" />
+          <div className="text-center text-gray-500 dark:text-maroon-text mb-4 text-sm italic">Thank you to Netgalley and the publisher for providing this ARC in exchange for an honest review!</div>
+          <div className="review-text text-gray-700 dark:text-maroon-text mb-6">
             <p>{book.review}</p>
           </div>
           {book.review_date && (
-            <div className="text-center text-gray-500 italic text-xs mb-6">Date posted: {book.review_date}</div>
+            <div className="text-center text-gray-500 dark:text-maroon-text italic text-xs mb-6">Date posted: {book.review_date}</div>
           )}
           {/* Book Links */}
           <div className="book-links flex justify-center gap-3 my-4">
             {book.goodreads_link && (
-              <a href={book.goodreads_link} className="book-link bg-gray-200 px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100" target="_blank" rel="noopener noreferrer">Goodreads</a>
+              <a href={book.goodreads_link} className="book-link bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100 dark:hover:bg-maroon-text hover:text-gray-900 dark:hover:text-gray-900 transition-colors" target="_blank" rel="noopener noreferrer">Goodreads</a>
             )}
             {book.storygraph_link && (
-              <a href={book.storygraph_link} className="book-link bg-gray-200 px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100" target="_blank" rel="noopener noreferrer">Storygraph</a>
+              <a href={book.storygraph_link} className="book-link bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100 dark:hover:bg-maroon-text hover:text-gray-900 dark:hover:text-gray-900 transition-colors" target="_blank" rel="noopener noreferrer">Storygraph</a>
             )}
             {book.bookshop_link && (
-              <a href={book.bookshop_link} className="book-link bg-gray-200 px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100" target="_blank" rel="noopener noreferrer">Bookshop.org</a>
+              <a href={book.bookshop_link} className="book-link bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100 dark:hover:bg-maroon-text hover:text-gray-900 dark:hover:text-gray-900 transition-colors" target="_blank" rel="noopener noreferrer">Bookshop.org</a>
             )}
             {book.barnes_noble_link && (
-              <a href={book.barnes_noble_link} className="book-link bg-gray-200 px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100" target="_blank" rel="noopener noreferrer">Barnes & Noble</a>
+              <a href={book.barnes_noble_link} className="book-link bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100 dark:hover:bg-maroon-text hover:text-gray-900 dark:hover:text-gray-900 transition-colors" target="_blank" rel="noopener noreferrer">Barnes & Noble</a>
             )}
           </div>
         </main>
