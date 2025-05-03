@@ -82,22 +82,12 @@ export const BookCard = ({ book }: BookCardProps) => {
       
       {/* Card Footer */}
       <div className="p-4 pt-0 mt-2">
-        {book.title === 'Where Shadows Meet' ? (
-          <a 
-            href="/legacy_html/shadowsmeet.html" 
-            className="inline-block w-full text-center py-2 px-4 bg-rose-600 hover:bg-rose-700 text-white rounded transition-colors"
-            target="_blank" rel="noopener noreferrer"
-          >
-            Read Review
-          </a>
-        ) : (
-          <Link 
-            to={`/reviews/${book.id}`} 
-            className="inline-block w-full text-center py-2 px-4 bg-rose-600 hover:bg-rose-700 text-white rounded transition-colors"
-          >
-            Read Review
-          </Link>
-        )}
+        <Link 
+          to={`/reviews/${book.id}`} 
+          className="inline-block w-full text-center py-2 px-4 bg-rose-600 hover:bg-rose-700 text-white rounded transition-colors"
+        >
+          Read Review
+        </Link>
       </div>
     </div>
   );

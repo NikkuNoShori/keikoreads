@@ -3,6 +3,7 @@ import { Home } from './pages/Home';
 import { About } from './pages/About';
 import { Reviews } from './pages/Reviews';
 import { Contact } from './pages/Contact';
+import { BookDetail } from './pages/BookDetail';
 
 const NotFound = () => (
   <div className="w-full text-center py-20">
@@ -17,6 +18,7 @@ export const AppRoutes = () => (
     <Route path="/" element={<Home />} />
     <Route path="/about" element={<About />} />
     <Route path="/reviews" element={<Reviews />} />
+    <Route path="/reviews/:id" element={<BookDetail />} />
     <Route path="/contact" element={<Contact />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
