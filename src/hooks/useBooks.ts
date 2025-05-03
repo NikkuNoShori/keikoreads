@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { BookSortField, SortDirection, BookFilters, Book } from '../types/BookTypes';
 import * as bookService from '../utils/bookService';
 
-interface UseBooksResult {
+export interface UseBooksResult {
   books: Book[];
   loading: boolean;
   error: Error | null;
