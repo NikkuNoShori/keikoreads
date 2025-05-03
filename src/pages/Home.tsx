@@ -16,31 +16,39 @@ export const Home = () => {
             <img
               src="/assets/keiko_Reads_2.png"
               alt="Keiko Reads Profile"
-              className="w-72 h-72 rounded-full object-cover border-4 border-rose-300 shadow-lg mb-4"
+              className="w-72 h-72 rounded-full object-cover border-4 border-rose-gold dark:border-maroon-card shadow-lg mb-4"
             />
-            <div className="bg-white dark:bg-gray-800 py-4 px-4 rounded-lg text-center shadow dark:text-maroon-text w-full flex flex-col justify-center min-h-[120px] max-w-md mx-auto mb-4">
+            <div className="bg-white dark:bg-gray-800 py-4 px-4 rounded-lg text-center shadow dark:text-maroon-text w-full flex flex-col justify-center min-h-[120px] max-w-md mx-auto mb-8">
               <h2 className="mb-1 text-2xl font-semibold">Hi friend!</h2>
               <p className="m-0 leading-relaxed text-base flex-1 flex items-center justify-center">
                 Welcome to my cozy reading nook on the web. I review advance reader copies (ARCs) from NetGalley and share all the bookish feels—whether it's swooning over a new romance, getting lost in a twisty thriller, or curling up with a heartwarming story. Grab a blanket, make some tea, and let's chat about books!
               </p>
             </div>
-            <div className="flex flex-col items-center w-full">
-              <h2 className="text-2xl text-gray-700 mb-1 font-normal">Social Media</h2>
-              <div className="flex justify-center items-center gap-4 bg-[#E6D7D7] dark:bg-gray-800 p-2 rounded-lg shadow w-fit dark:text-maroon-text mb-2">
-                <SmartLink to="https://www.instagram.com/keikoreads/">
-                  <img src="/assets/IG_icon.avif" alt="Instagram" className="w-12 h-12" />
-                </SmartLink>
-                <SmartLink to="https://app.thestorygraph.com/profile/keikoalisha">
-                  <img src="/assets/storygraph_icon.avif" alt="StoryGraph" className="w-12 h-12" />
-                </SmartLink>
-                <SmartLink to="https://www.goodreads.com/user/show/49508616-alisha-neal">
-                  <img src="/assets/goodreads_icon.avif" alt="Goodreads" className="w-12 h-12" />
-                </SmartLink>
+            <div className="flex flex-col items-center w-full mt-2">
+              {/* Social Media Section: Centered between welcome card and divider */}
+              <div className="flex flex-col items-center w-full max-w-md mx-auto">
+                <h2 className="text-2xl text-gray-700 mb-2 font-normal">Social Media</h2>
+                <div className="flex justify-center items-center gap-4 bg-[#E6D7D7] dark:bg-gray-800 p-2 rounded-lg shadow w-fit dark:text-maroon-text mb-2">
+                  <SmartLink to="https://www.instagram.com/keikoreads/">
+                    <img src="/assets/IG_icon.avif" alt="Instagram" className="w-12 h-12" />
+                  </SmartLink>
+                  <SmartLink to="https://app.thestorygraph.com/profile/keikoalisha">
+                    <img src="/assets/storygraph_icon.avif" alt="StoryGraph" className="w-12 h-12" />
+                  </SmartLink>
+                  <SmartLink to="https://www.goodreads.com/user/show/49508616-alisha-neal">
+                    <img src="/assets/goodreads_icon.avif" alt="Goodreads" className="w-12 h-12" />
+                  </SmartLink>
+                </div>
+              </div>
+              {/* Divider between social media and NetGalley image, matches welcome card width */}
+              <div className="w-full flex justify-center my-2">
+                <div className="border-t border-gray-300 dark:border-gray-600 w-full max-w-md" />
               </div>
               <img
                 src="/assets/netgalley.avif"
                 alt="NetGalley Member"
-                className="w-32 h-auto rounded-lg border border-gray-200 bg-white p-1 drop-shadow-lg mt-1"
+                className="w-48 h-auto rounded-lg drop-shadow-xl mt-2 mb-2"
+                style={{ background: 'transparent' }}
               />
             </div>
           </div>
