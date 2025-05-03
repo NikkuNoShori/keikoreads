@@ -40,7 +40,7 @@ export const Reviews = () => {
   };
 
   // Handle new review submit
-  const handleNewReview = async (data: any) => {
+  const handleNewReview = async () => {
     setShowModal(false);
     await fetchBooks();
   };
@@ -98,7 +98,7 @@ export const Reviews = () => {
               ×
             </button>
             <h2 className="text-2xl font-semibold mb-4">New Book Review</h2>
-            <ReviewForm onSubmit={handleNewReview} onCancel={() => setShowModal(false)} />
+            <ReviewForm onSubmit={handleNewReview} />
             <div className="flex justify-end gap-4 mt-6">
               <button
                 onClick={() => setShowModal(false)}
