@@ -7,11 +7,10 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface ReviewFormProps {
   onSubmit: (data: any) => void;
-  onCancel: () => void;
   initialData?: any;
 }
 
-export const ReviewForm = ({ onSubmit, onCancel, initialData }: ReviewFormProps) => {
+export const ReviewForm = ({ onSubmit, initialData }: ReviewFormProps) => {
   const [form, setForm] = useState({
     title: initialData?.title || '',
     author: initialData?.author || '',
@@ -30,7 +29,6 @@ export const ReviewForm = ({ onSubmit, onCancel, initialData }: ReviewFormProps)
     barnes_noble_link: initialData?.barnes_noble_link || '',
     read_alikes_image: initialData?.read_alikes_image || '',
   });
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -40,11 +38,8 @@ export const ReviewForm = ({ onSubmit, onCancel, initialData }: ReviewFormProps)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
     // Insert into Supabase
     const { data, error } = await supabase.from('books').insert([form]).select().single();
-    setLoading(false);
     if (error) {
       setError(error.message);
     } else {

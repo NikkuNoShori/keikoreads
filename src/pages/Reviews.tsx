@@ -18,10 +18,10 @@ export const Reviews = () => {
     loading,
     error,
     totalCount,
+    fetchBooks,
     currentPage,
     setCurrentPage,
     pageSize,
-    refetch,
   } = useBooks(sortField, sortDirection, filters);
 
   // Handle sort changes
@@ -42,7 +42,7 @@ export const Reviews = () => {
   // Handle new review submit
   const handleNewReview = async (data: any) => {
     setShowModal(false);
-    await refetch();
+    await fetchBooks();
   };
 
   // Calculate total pages
