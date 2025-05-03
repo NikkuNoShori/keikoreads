@@ -89,7 +89,7 @@ export const Reviews = () => {
       {/* Modal for New Review */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg max-w-3xl w-full p-8 relative max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg max-w-xl w-full p-4 relative max-h-[80vh] overflow-y-auto">
             <button
               onClick={() => setShowModal(false)}
               className="absolute top-2 right-2 text-gray-500 hover:text-rose-600 text-2xl font-bold"
