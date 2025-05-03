@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Book } from '../types/BookTypes';
 import { getBookById, deleteBook } from '../utils/bookService';
 import { formatDate, formatExternalLink } from '../utils/formatters';
+import { SmartLink } from '../components/SmartLink';
 
 export const ReviewDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -88,9 +89,9 @@ export const ReviewDetail = () => {
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           <p className="font-bold">Error</p>
           <p>{error}</p>
-          <Link to="/reviews" className="inline-block mt-4 text-rose-600 hover:underline">
+          <SmartLink to="/reviews" className="inline-block mt-4 text-rose-600 hover:underline">
             Return to Reviews
-          </Link>
+          </SmartLink>
         </div>
       </div>
     );
@@ -100,9 +101,9 @@ export const ReviewDetail = () => {
     return (
       <div className="max-w-4xl mx-auto px-4 py-12 text-center">
         <p className="text-xl text-gray-700 dark:text-gray-300">Review not found</p>
-        <Link to="/reviews" className="inline-block mt-4 text-rose-600 hover:underline">
+        <SmartLink to="/reviews" className="inline-block mt-4 text-rose-600 hover:underline">
           Return to Reviews
-        </Link>
+        </SmartLink>
       </div>
     );
   }
@@ -173,47 +174,19 @@ export const ReviewDetail = () => {
           {/* External Links */}
           <div className="flex flex-wrap gap-3 mb-6">
             {book.goodreads_link && (
-              <a 
-                href={formatExternalLink(book.goodreads_link)} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-              >
-                Goodreads
-              </a>
+              <SmartLink to={formatExternalLink(book.goodreads_link)} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Goodreads</SmartLink>
             )}
             
             {book.storygraph_link && (
-              <a 
-                href={formatExternalLink(book.storygraph_link)} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-              >
-                StoryGraph
-              </a>
+              <SmartLink to={formatExternalLink(book.storygraph_link)} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">StoryGraph</SmartLink>
             )}
             
             {book.bookshop_link && (
-              <a 
-                href={formatExternalLink(book.bookshop_link)} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-              >
-                Bookshop.org
-              </a>
+              <SmartLink to={formatExternalLink(book.bookshop_link)} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Bookshop.org</SmartLink>
             )}
             
             {book.barnes_noble_link && (
-              <a 
-                href={formatExternalLink(book.barnes_noble_link)} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-              >
-                Barnes & Noble
-              </a>
+              <SmartLink to={formatExternalLink(book.barnes_noble_link)} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Barnes & Noble</SmartLink>
             )}
           </div>
           
@@ -275,9 +248,9 @@ export const ReviewDetail = () => {
       
       {/* Back to Reviews */}
       <div className="mt-10">
-        <Link to="/reviews" className="text-rose-600 hover:underline">
+        <SmartLink to="/reviews" className="text-rose-600 hover:underline">
           ← Back to All Reviews
-        </Link>
+        </SmartLink>
       </div>
       
       {/* Delete Confirmation Modal */}

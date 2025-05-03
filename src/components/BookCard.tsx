@@ -1,6 +1,7 @@
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 import { Book } from '../types/BookTypes';
 import { formatDate } from '../utils/formatters';
+import { SmartLink } from './SmartLink';
 
 interface BookCardProps {
   book: Book;
@@ -46,9 +47,9 @@ export const BookCard = ({ book }: BookCardProps) => {
         {/* Overlay info section, contained within the image area */}
         <div className="absolute bottom-0 left-0 right-0 bg-gray-400/95 p-3 rounded-b-lg transition-all duration-300 flex flex-col justify-center group-hover:bg-gray-500/95">
           <h2 className="text-lg font-semibold text-white mb-0 line-clamp-2">
-            <Link to={`/reviews/${book.id}`} className="hover:underline">
+            <SmartLink to={`/reviews/${book.id}`} className="hover:underline">
               {book.title}
-            </Link>
+            </SmartLink>
           </h2>
           <p className="text-white/90 text-xs mb-0">by {book.author}{book.series && <span className="italic"> ({book.series})</span>}</p>
           <div className="flex items-center justify-center mb-0 mt-1">

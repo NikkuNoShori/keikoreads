@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { createClient } from '@supabase/supabase-js';
 import { Book } from '../types/BookTypes';
+import { SmartLink } from '../components/SmartLink';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -74,16 +75,16 @@ export const BookDetail = () => {
           {/* Book Links */}
           <div className="book-links flex justify-center gap-3 my-4">
             {book.goodreads_link && (
-              <a href={book.goodreads_link} className="book-link bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100 dark:hover:bg-maroon-text hover:text-gray-900 dark:hover:text-gray-900 transition-colors" target="_blank" rel="noopener noreferrer">Goodreads</a>
+              <SmartLink to={book.goodreads_link} className="book-link bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100 dark:hover:bg-maroon-text hover:text-gray-900 dark:hover:text-gray-900 transition-colors">Goodreads</SmartLink>
             )}
             {book.storygraph_link && (
-              <a href={book.storygraph_link} className="book-link bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100 dark:hover:bg-maroon-text hover:text-gray-900 dark:hover:text-gray-900 transition-colors" target="_blank" rel="noopener noreferrer">Storygraph</a>
+              <SmartLink to={book.storygraph_link} className="book-link bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100 dark:hover:bg-maroon-text hover:text-gray-900 dark:hover:text-gray-900 transition-colors">Storygraph</SmartLink>
             )}
             {book.bookshop_link && (
-              <a href={book.bookshop_link} className="book-link bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100 dark:hover:bg-maroon-text hover:text-gray-900 dark:hover:text-gray-900 transition-colors" target="_blank" rel="noopener noreferrer">Bookshop.org</a>
+              <SmartLink to={book.bookshop_link} className="book-link bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100 dark:hover:bg-maroon-text hover:text-gray-900 dark:hover:text-gray-900 transition-colors">Bookshop.org</SmartLink>
             )}
             {book.barnes_noble_link && (
-              <a href={book.barnes_noble_link} className="book-link bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100 dark:hover:bg-maroon-text hover:text-gray-900 dark:hover:text-gray-900 transition-colors" target="_blank" rel="noopener noreferrer">Barnes & Noble</a>
+              <SmartLink to={book.barnes_noble_link} className="book-link bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100 dark:hover:bg-maroon-text hover:text-gray-900 dark:hover:text-gray-900 transition-colors">Barnes & Noble</SmartLink>
             )}
           </div>
         </main>

@@ -1,5 +1,6 @@
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 import { DarkModeToggle } from './DarkModeToggle';
+import { SmartLink } from './SmartLink';
 
 interface HeaderProps {
   isDarkMode: boolean;
@@ -26,7 +27,7 @@ export const Header = ({ isDarkMode, toggleDarkMode }: HeaderProps) => {
         <ul className="flex flex-row justify-center items-center gap-2 m-0 p-0 list-none flex-1">
           {['Home', 'About', 'Reviews', 'Contact'].map((label, idx, arr) => (
             <li key={label} className="flex flex-row items-center">
-              <Link
+              <SmartLink
                 to={
                   label === 'Home'
                     ? '/' 
@@ -35,7 +36,7 @@ export const Header = ({ isDarkMode, toggleDarkMode }: HeaderProps) => {
                 className="text-gray-700 dark:text-maroon-text no-underline text-base py-1 px-6 block hover:text-rose-600 dark:hover:text-rose-300 transition-colors duration-300"
               >
                 {label}
-              </Link>
+              </SmartLink>
               {idx < arr.length - 1 && (
                 <span className="text-gray-400 mx-1 select-none">&bull;</span>
               )}

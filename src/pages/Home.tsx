@@ -1,3 +1,4 @@
+import { SmartLink } from '../components/SmartLink';
 // import React from 'react';
 
 export const Home = () => {
@@ -17,15 +18,15 @@ export const Home = () => {
           <div className="text-center">
             <h2 className="text-lg text-gray-700 mb-3 font-normal">Social Media</h2>
             <div className="flex justify-center items-center gap-3 mb-5 bg-[#E6D7D7] dark:bg-gray-800 p-3 rounded-lg shadow w-fit mx-auto dark:text-maroon-text">
-              <a href="https://www.instagram.com/keikoreads/" target="_blank" rel="noopener noreferrer">
+              <SmartLink to="https://www.instagram.com/keikoreads/">
                 <img src="/assets/IG_icon.avif" alt="Instagram" className="w-7 h-7" />
-              </a>
-              <a href="https://app.thestorygraph.com/profile/keikoalisha" target="_blank" rel="noopener noreferrer">
+              </SmartLink>
+              <SmartLink to="https://app.thestorygraph.com/profile/keikoalisha">
                 <img src="/assets/storygraph_icon.avif" alt="StoryGraph" className="w-7 h-7" />
-              </a>
-              <a href="https://www.goodreads.com/user/show/49508616-alisha-neal" target="_blank" rel="noopener noreferrer">
+              </SmartLink>
+              <SmartLink to="https://www.goodreads.com/user/show/49508616-alisha-neal">
                 <img src="/assets/goodreads_icon.avif" alt="Goodreads" className="w-7 h-7" />
-              </a>
+              </SmartLink>
             </div>
             <img src="/assets/netgalley.avif" alt="NetGalley Member" className="w-44 h-auto mx-auto my-2" />
           </div>
@@ -36,25 +37,25 @@ export const Home = () => {
           <div className="flex flex-col gap-8 items-center">
             {/* Review Card 1 */}
             <div className="w-full max-w-xs relative group">
-              <a href="#" className="block">
+              <SmartLink to="#" className="block">
                 <img src="/assets/WSM.avif" alt="Where Shadows Meet" className="w-full h-auto rounded-lg shadow-lg" />
                 <div className="bg-gray-400/95 p-4 absolute bottom-0 left-0 right-0 rounded-b-lg transition-all duration-300 h-1/4 flex flex-col justify-center group-hover:h-1/2 group-hover:bg-gray-500/95">
                   <h3 className="text-white text-lg m-0 transition-all">Where Shadows Meet</h3>
                   <p className="text-white/90 text-base m-0">Patrice Caldwell</p>
                   <p className="text-white/80 text-sm m-0">April 22, 2025</p>
                 </div>
-              </a>
+              </SmartLink>
             </div>
             {/* Review Card 2 */}
             <div className="w-full max-w-xs relative group">
-              <a href="#" className="block">
+              <SmartLink to="#" className="block">
                 <img src="/assets/DotA.avif" alt="Death of the Author" className="w-full h-auto rounded-lg shadow-lg" />
                 <div className="bg-gray-400/95 p-4 absolute bottom-0 left-0 right-0 rounded-b-lg transition-all duration-300 h-1/4 flex flex-col justify-center group-hover:h-1/2 group-hover:bg-gray-500/95">
                   <h3 className="text-white text-lg m-0 transition-all">Death of the Author</h3>
                   <p className="text-white/90 text-base m-0">Nnedi Okorafor</p>
                   <p className="text-white/80 text-sm m-0">April 8th, 2025</p>
                 </div>
-              </a>
+              </SmartLink>
             </div>
           </div>
         </div>
