@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary-color: #2c3e50;
+    --secondary-color: #34495e;
+    --accent-color: #e74c3c;
+    --text-color: #333;
+    --light-text: #fff;
+  }
+
+  .dark {
+    --primary-color: #2C0B13; /* maroon-outer */
+    --secondary-color: #1A0A0F; /* maroon-container */
+    --card-color: #4B183B; /* maroon-card */
+    --accent-color: #E6B7B7; /* maroon-accent */
+    --text-color: #F5F5F5; /* maroon-text */
+    --light-text: #B8B8B8; /* maroon-secondary */
+  }
+}

@@ -4,8 +4,115 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shadows Meet - Book Review | Keiko Reads</title>
-    <link rel="stylesheet" href="styles.css">
     <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #e74c3c;
+            --text-color: #333;
+            --light-text: #fff;
+            --background-color: #f9f9f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #E6D7D7;
+        }
+
+        .page-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-image: url('/assets/library_photo.avif');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .site-logo {
+            width: 150px;
+            height: auto;
+            display: block;
+            position: relative;
+            z-index: 2;
+        }
+
+        nav {
+            width: 100%;
+            background-color: white;
+            margin-top: auto;
+            border-top: 1px solid #E6D7D7;
+            border-bottom: 1px solid #E6D7D7;
+            padding: 2px 0;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .nav-menu li {
+            flex: 1;
+            max-width: 150px;
+            text-align: center;
+            position: relative;
+        }
+
+        .nav-menu li:not(:last-child)::after {
+            content: "•";
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #333;
+        }
+
+        .nav-menu a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 1rem;
+            padding: 0.2rem 1.5rem;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+
+        .content-wrapper {
+            padding: 20px 20px 0 20px;
+            display: flex;
+            gap: 30px;
+        }
+
         .book-info {
             flex: 1;
             max-width: 250px;
@@ -145,36 +252,53 @@
             display: flex;
             justify-content: center;
             gap: 20px;
-            flex-wrap: wrap;
+            margin-top: 10px;
         }
 
         .book-recommendation {
             background-color: white;
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
+            width: 220px;
             text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            flex: 1;
-            min-width: 200px;
-            max-width: 220px;
         }
 
         .book-recommendation img {
             width: 100%;
-            max-width: 150px;
+            height: auto;
             border-radius: 4px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
-        .book-recommendation h3 {
-            font-size: 1rem;
-            margin-bottom: 5px;
-            color: #333;
+        .book-recommendation a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.85rem;
+            display: block;
+            line-height: 1.2;
         }
 
-        .book-recommendation p {
-            font-size: 0.8rem;
+        .book-recommendation a:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            background-color: #E6D7D7;
             color: #666;
+            text-align: center;
+            padding: 12px 0;
+            margin-top: 20px;
+            font-size: 0.85rem;
+        }
+
+        footer .divider {
+            border-top: 1px solid #ccc;
+            margin: 0 auto 12px;
+            width: 90%;
+        }
+
+        footer p {
             margin: 0;
         }
     </style>
@@ -182,7 +306,7 @@
 <body>
     <div class="page-container">
         <header>
-            <img src="Keiko_Reads_3.png" alt="Keiko Reads Logo" class="site-logo">
+            <img src="/assets/Keiko_Reads_3.png" alt="Keiko Reads Logo" class="site-logo">
             <nav>
                 <div class="nav-container">
                     <ul class="nav-menu">
@@ -196,7 +320,7 @@
 
         <div class="content-wrapper">
             <aside class="book-info">
-                <img src="WSM.avif" alt="Shadows Meet Book Cover" class="book-cover">
+                <img src="/assets/WSM.avif" alt="Shadows Meet Book Cover" class="book-cover">
                 <div class="book-details">
                     <h2>Book Details</h2>
                     <p><span class="label">Author:</span> Alisha Neal</p>
@@ -246,41 +370,33 @@
                         had no idea of where they were or how the surroundings looked. I really wanted to like this book, but it wasn't
                         for me.</p>
                 </div>
-
-                <div style="text-align: center; color: #666; font-style: italic; font-size: 0.85rem; margin: 20px 0 10px;">
-                    Date posted: April 08, 2025
-                </div>
+<div style="text-align: center; color: #666; font-style: italic; font-size: 0.85rem; margin: 20px 0 10px;">
+    Date posted: April 08, 2025
+</div>
 
                 <div class="book-links">
-                    <a href="https://www.goodreads.com/book/show/216405568-house-of-blight" class="book-link" target="_blank">Goodreads</a>
-                    <a href="https://app.thestorygraph.com/books/house-of-blight" class="book-link" target="_blank">StoryGraph</a>
-                    <a href="https://bookshop.org/books/house-of-blight" class="book-link" target="_blank">Bookshop.org</a>
-                    <a href="https://www.barnesandnoble.com/w/house-of-blight-madeleine-watts/1145694342" class="book-link"
-                        target="_blank">Barnes & Noble</a>
+                    <a href="#" class="book-link">Goodreads</a>
+                    <a href="#" class="book-link">Storygraph</a>
+                    <a href="#" class="book-link">Bookshop.org</a>
+                    <a href="#" class="book-link">Barnes & Noble</a>
                 </div>
+            </main>
+        </div>
 
-                <section class="read-alikes-section">
-                    <div class="read-alikes-container">
-                        <h2 class="read-alikes-header">Read Alikes</h2>
-                        <div class="recommendations">
-                            <div class="book-recommendation">
-                                <a href="https://www.goodreads.com/book/show/127282888-dead-in-long-beach-california" target="_blank">
-                                    <img src="deadinlongbeach.jpg" alt="Dead in Long Beach, California Book Cover">
-                                    <h3>Dead in Long Beach, California</h3>
-                                    <p>by Venita Blackburn</p>
-                                </a>
-                                </div>
-                                <div class="book-recommendation">
-                                <a href="https://www.goodreads.com/book/show/216405568-house-of-blight" target="_blank">
-                                    <img src="houseblight.jpg" alt="House of Blight Book Cover">
-                                    <h3>House of Blight</h3>
-                                    <p>by Madeleine Watts</p>
-                                </a>
-                                </div>
-                                </div>
-                                </div>
-                </section>
-                </main>
+        <div class="read-alikes-section">
+            <div class="read-alikes-container">
+                <h2 class="read-alikes-header">Read Alikes</h2>
+                <div class="recommendations">
+                    <div class="book-recommendation">
+                        <img src="/assets/DotA.avif" alt="From Blood and Ash Cover">
+                        <a href="#">From Blood and Ash by Jennifer L. Armentrout</a>
+                    </div>
+                    <div class="book-recommendation">
+                        <img src="/assets/WSM.avif" alt="House of Blight Cover">
+                        <a href="#">House of Blight by Maxym M. Martineau</a>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <footer>

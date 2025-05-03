@@ -1,0 +1,37 @@
+tables:
+  - name: books
+    vector:
+      embedding:
+        dimensions: 1536
+        similarity_function: cosine
+    indexes:
+      - name: books_embedding_idx
+        using: ivfflat
+        with:
+          lists: 100
+
+functions:
+  - name: search_books_by_embedding
+    definition:
+      parameters:
+        - name: query_embedding
+          type: vector(1536)
+        - name: match_threshold
+          type: float
+        - name: match_count
+          type: int
+      returns: table(id uuid, title text, author text, genre text, similarity float)
+      language: plpgsql
+      behavior: stable
+
+  - name: find_similar_books
+    definition:
+      parameters:
+        - name: book_id
+          type: uuid
+        - name: match_count
+          type: int
+          default: 5
+      returns: table(id uuid, title text, author text, genre text, similarity float)
+      language: plpgsql
+      behavior: stable 
