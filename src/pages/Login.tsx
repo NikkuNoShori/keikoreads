@@ -4,6 +4,7 @@ import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { SmartLink } from '../components/SmartLink';
 import { AuthLayout } from '../components/AuthLayout';
 import { OAuthButton } from '../components/OAuthButton';
+import { supabase } from '../utils/supabaseClient';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
@@ -24,6 +25,32 @@ export const Login = () => {
   if (isAuthenticated) {
     return <Navigate to={returnUrl} replace />;
   }
+
+  // Check if user exists before signing in
+  const checkUserExists = async (email: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('email', email)
+        .single();
+      
+      if (error && error.code === 'PGRST116') {
+        // PGRST116 means no rows returned - user doesn't exist
+        return false;
+      } else if (error) {
+        console.error('Error checking user:', error);
+        // If there's another error, we'll proceed with sign in attempt
+        // and let Supabase handle the error properly
+        return true;
+      }
+      
+      return !!data;
+    } catch (err) {
+      console.error('Error in checkUserExists:', err);
+      return true; // Proceed with sign in attempt if check fails
+    }
+  };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,10 +58,21 @@ export const Login = () => {
     setError(null);
     
     try {
+      // First check if user exists
+      const userExists = await checkUserExists(email);
+      
+      if (!userExists) {
+        setError("No account found with this email address. Please sign up first.");
+        setLoading(false);
+        return;
+      }
+      
       const { data, error } = await signIn(email, password);
       
       if (error) {
-        throw error;
+        // Type assertion for error object
+        const errorObj = error as { message?: string };
+        throw new Error(errorObj.message || 'Failed to sign in');
       }
       
       if (data) {

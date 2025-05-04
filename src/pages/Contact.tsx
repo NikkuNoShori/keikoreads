@@ -26,7 +26,7 @@ export const Contact = () => {
             I'd love to hear from you! Whether you're a publisher, author, or fellow book lover,
             feel free to reach out through the form or connect with me on social media.
           </p>
-          <div className="bg-rose-gold dark:bg-gray-800 dark:text-maroon-text p-4 rounded-lg shadow-md mb-6">
+          <div className="p-4 rounded-lg shadow-md mb-6">
             <h2 className="text-xl font-semibold mb-4">Connect with Me</h2>
             <div className="space-y-3">
               <a
@@ -72,7 +72,7 @@ export const Contact = () => {
           </div>
         </div>
         <div className="flex-1">
-          <div className="bg-rose-gold dark:bg-gray-800 dark:text-maroon-text p-6 rounded-2xl shadow-lg border dark:border-gray-700">
+          <div className="p-6 rounded-2xl shadow-lg border dark:border-gray-700">
             <form className="space-y-6">
               <div>
                 <label

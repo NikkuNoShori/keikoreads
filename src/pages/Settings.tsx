@@ -2,44 +2,147 @@ import React, { useState, useEffect } from 'react';
 import { useAuthContext } from '../context/AuthContext';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 
+interface ValidationErrors {
+  first_name?: string;
+  last_name?: string;
+  date_of_birth?: string;
+  email?: string;
+}
+
 export const Settings = () => {
-  const { profile, profileLoading, refreshProfile } = useAuthContext();
+  const { profile, profileLoading, refreshProfile, user } = useAuthContext();
   const [activeTab, setActiveTab] = useState('profile');
   const [localProfile, setLocalProfile] = useState(profile);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<ValidationErrors>({});
+  const [updateSuccess, setUpdateSuccess] = useState(false);
 
   useEffect(() => {
     setLocalProfile(profile);
   }, [profile]);
 
+  // Input validation
+  const validateInput = (name: string, value: string): string | undefined => {
+    switch (name) {
+      case 'first_name':
+      case 'last_name':
+        if (!value.trim()) return 'This field is required';
+        if (value.length > 50) return 'Maximum 50 characters allowed';
+        if (!/^[a-zA-Z\s-']+$/.test(value)) return 'Only letters, spaces, hyphens and apostrophes allowed';
+        return undefined;
+      case 'date_of_birth':
+        if (value) {
+          const dob = new Date(value);
+          const today = new Date();
+          if (dob > today) return 'Date of birth cannot be in the future';
+          const minDate = new Date();
+          minDate.setFullYear(today.getFullYear() - 120);
+          if (dob < minDate) return 'Invalid date of birth';
+        }
+        return undefined;
+      case 'email':
+        if (!value.trim()) return 'Email is required';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Invalid email format';
+        return undefined;
+      default:
+        return undefined;
+    }
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    
+    // Update the local profile
     setLocalProfile((prev) => prev ? { ...prev, [name]: value } : prev);
+    
+    // Validate and update errors
+    const error = validateInput(name, value);
+    setErrors(prev => ({
+      ...prev,
+      [name]: error
+    }));
+
+    // Reset success message when editing
+    if (updateSuccess) setUpdateSuccess(false);
+  };
+
+  const isFormValid = (): boolean => {
+    // Validate all fields before submission
+    const newErrors: ValidationErrors = {};
+    if (localProfile) {
+      Object.entries(localProfile).forEach(([key, value]) => {
+        if (['first_name', 'last_name', 'date_of_birth', 'email'].includes(key)) {
+          const error = validateInput(key, value as string);
+          if (error) newErrors[key as keyof ValidationErrors] = error;
+        }
+      });
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const saveProfile = async () => {
     if (!localProfile) return;
+    if (!isFormValid()) return;
+
     setLoading(true);
-    // Only update changed fields
-    const { id, first_name, last_name, date_of_birth, avatar_url } = localProfile;
-    await fetch('/api/update-profile', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, first_name, last_name, date_of_birth, avatar_url }),
-    });
-    await refreshProfile();
-    setLoading(false);
-    alert('Profile updated successfully!');
+    try {
+      // Prepare data for update - all editable fields
+      const { id, first_name, last_name, date_of_birth, email, avatar_url } = localProfile;
+      
+      const updateData = {
+        id,
+        first_name,
+        last_name,
+        date_of_birth,
+        email,
+        avatar_url
+      };
+
+      const response = await fetch('/api/update-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update profile');
+      }
+
+      await refreshProfile();
+      setUpdateSuccess(true);
+    } catch (err) {
+      console.error('Profile update error:', err);
+      alert('Failed to update profile. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Get the avatar from OAuth or profile
+  const getAvatar = () => {
+    // First try profile avatar
+    if (localProfile?.avatar_url) {
+      return localProfile.avatar_url;
+    }
+    
+    // Then try user metadata from OAuth
+    if (user?.user_metadata?.avatar_url) {
+      return user.user_metadata.avatar_url;
+    }
+    
+    return null;
   };
 
   return (
     <ProtectedRoute requireAuth={true}>
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="w-full">
         <h1 className="text-3xl font-bold mb-8">Account Settings</h1>
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sidebar */}
           <div className="w-full md:w-64 flex-shrink-0">
-            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+            <div className="shadow rounded-lg p-4">
               <div className="flex flex-col space-y-1">
                 <button
                   onClick={() => setActiveTab('profile')}
@@ -61,22 +164,18 @@ export const Settings = () => {
                 >
                   Account
                 </button>
-                <button
-                  onClick={() => setActiveTab('preferences')}
-                  className={`text-left px-4 py-2 rounded-md ${
-                    activeTab === 'preferences'
-                      ? 'bg-rose-100 text-rose-700 dark:bg-gray-700 dark:text-rose-400'
-                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  Preferences
-                </button>
               </div>
             </div>
           </div>
           {/* Main content */}
           <div className="flex-1">
-            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+            <div className="shadow rounded-lg p-6">
+              {updateSuccess && (
+                <div className="mb-4 p-3 bg-green-100 text-green-800 dark:bg-green-800/30 dark:text-green-300 rounded-md">
+                  Profile updated successfully!
+                </div>
+              )}
+              
               {activeTab === 'profile' && localProfile && (
                 <div>
                   <h2 className="text-xl font-semibold mb-6">Profile Settings</h2>
@@ -85,9 +184,9 @@ export const Settings = () => {
                       Profile Photo
                     </label>
                     <div className="flex items-center space-x-4">
-                      {localProfile.avatar_url ? (
+                      {getAvatar() ? (
                         <img
-                          src={localProfile.avatar_url}
+                          src={getAvatar()!}
                           alt="Profile"
                           className="w-16 h-16 rounded-full object-cover border border-gray-200 dark:border-gray-700"
                         />
@@ -97,7 +196,7 @@ export const Settings = () => {
                         </div>
                       )}
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {localProfile.avatar_url ? 'Photo from OAuth provider' : 'No profile photo set'}
+                        {getAvatar() ? 'Photo from your account' : 'No profile photo set'}
                       </p>
                     </div>
                   </div>
@@ -110,10 +209,13 @@ export const Settings = () => {
                         type="text"
                         id="first_name"
                         name="first_name"
-                        value={localProfile.first_name}
+                        value={localProfile.first_name || ''}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        className={`w-full px-3 py-2 border ${errors.first_name ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
                       />
+                      {errors.first_name && (
+                        <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.first_name}</p>
+                      )}
                     </div>
                     <div>
                       <label htmlFor="last_name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -123,10 +225,13 @@ export const Settings = () => {
                         type="text"
                         id="last_name"
                         name="last_name"
-                        value={localProfile.last_name}
+                        value={localProfile.last_name || ''}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        className={`w-full px-3 py-2 border ${errors.last_name ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
                       />
+                      {errors.last_name && (
+                        <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.last_name}</p>
+                      )}
                     </div>
                   </div>
                   <div className="mb-6">
@@ -139,8 +244,27 @@ export const Settings = () => {
                       name="date_of_birth"
                       value={localProfile.date_of_birth || ''}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      className={`w-full px-3 py-2 border ${errors.date_of_birth ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
                     />
+                    {errors.date_of_birth && (
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.date_of_birth}</p>
+                    )}
+                  </div>
+                  <div className="mb-6">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={localProfile.email || ''}
+                      onChange={handleInputChange}
+                      className={`w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
+                    />
+                    {errors.email && (
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>
+                    )}
                   </div>
                   <button
                     className="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700 transition-colors dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent disabled:opacity-50 disabled:cursor-not-allowed"
@@ -155,56 +279,16 @@ export const Settings = () => {
                 <div>
                   <h2 className="text-xl font-semibold mb-6">Account Settings</h2>
                   <div className="mb-6">
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      value={localProfile.email}
-                      readOnly
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400"
-                    />
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                      Email can't be changed when authenticated with Google
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                      {user?.app_metadata?.provider 
+                        ? `Your account is connected with ${user.app_metadata.provider}` 
+                        : 'Your account uses email for login'}
                     </p>
                   </div>
                   <div className="border-t border-gray-200 dark:border-gray-700 my-8 pt-8">
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Danger Zone</h3>
                     <button className="px-4 py-2 border border-red-600 text-red-600 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
                       Delete Account
-                    </button>
-                  </div>
-                </div>
-              )}
-              {activeTab === 'preferences' && (
-                <div>
-                  <h2 className="text-xl font-semibold mb-6">Preferences</h2>
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Email Notifications</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Receive email updates about new reviews</p>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" value="" className="sr-only peer" />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 dark:peer-focus:ring-rose-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-rose-600"></div>
-                      </label>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Reading List Updates</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Get notified when books on your reading list are updated</p>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" value="" className="sr-only peer" defaultChecked />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 dark:peer-focus:ring-rose-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-rose-600"></div>
-                      </label>
-                    </div>
-                  </div>
-                  <div className="mt-8">
-                    <button className="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700 transition-colors dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent">
-                      Save Preferences
                     </button>
                   </div>
                 </div>

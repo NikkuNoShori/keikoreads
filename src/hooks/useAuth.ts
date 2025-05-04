@@ -28,6 +28,30 @@ export const useAuth = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
 
+  // Check if a user exists with a specific email
+  const checkUserExists = async (email: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("email", email)
+        .single();
+
+      if (error && error.code === "PGRST116") {
+        // PGRST116 means no rows returned - user doesn't exist
+        return false;
+      } else if (error) {
+        console.error("Error checking user:", error);
+        return false;
+      }
+
+      return !!data;
+    } catch (err) {
+      console.error("Error in checkUserExists:", err);
+      return false;
+    }
+  };
+
   // Upsert profile from OAuth/session
   const upsertProfileFromOAuth = async (user: User) => {
     if (!user) return;
@@ -71,6 +95,13 @@ export const useAuth = () => {
         await upsertProfileFromOAuth(authState.user);
         // Fetch profile
         await fetchProfile(authState.user);
+
+        // Handle redirect after successful OAuth
+        const returnUrl = localStorage.getItem("authReturnUrl");
+        if (returnUrl) {
+          localStorage.removeItem("authReturnUrl");
+          window.location.href = returnUrl;
+        }
       } else {
         setProfile(null);
       }
@@ -126,6 +157,19 @@ export const useAuth = () => {
 
   const signIn = async (email: string, password: string) => {
     try {
+      // First check if user exists
+      const userExists = await checkUserExists(email);
+
+      if (!userExists) {
+        return {
+          data: null,
+          error: {
+            message:
+              "No account found with this email address. Please sign up first.",
+          },
+        };
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -162,6 +206,19 @@ export const useAuth = () => {
 
   const signUp = async (email: string, password: string) => {
     try {
+      // Check if user already exists
+      const userExists = await checkUserExists(email);
+
+      if (userExists) {
+        return {
+          data: null,
+          error: {
+            message:
+              "An account with this email already exists. Please sign in instead.",
+          },
+        };
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,

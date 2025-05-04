@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuthContext } from '../context/AuthContext';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { SmartLink } from '../components/SmartLink';
 import { AuthLayout } from '../components/AuthLayout';
 import { OAuthButton } from '../components/OAuthButton';
@@ -16,6 +16,11 @@ export const Signup = () => {
   
   const { signUp, signInWithOAuth, isAuthenticated } = useAuthContext();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get the returnUrl from query params or default to home
+  const searchParams = new URLSearchParams(location.search);
+  const returnUrl = searchParams.get('returnUrl') || '/';
   
   // If already authenticated, redirect to home
   if (isAuthenticated) {
@@ -49,9 +54,8 @@ export const Signup = () => {
         }, 3000); // Redirect to login after 3 seconds
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : 'Failed to sign up';
+      const errorObj = error as { message?: string };
+      const errorMessage = errorObj.message || 'Failed to sign up';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -64,7 +68,7 @@ export const Signup = () => {
     
     try {
       // Store the returnUrl in localStorage so we can access it after the OAuth redirect
-      localStorage.setItem('authReturnUrl', '/');
+      localStorage.setItem('authReturnUrl', returnUrl);
       
       const { error } = await signInWithOAuth('google');
       
