@@ -5,6 +5,7 @@ import { BookFilters, BookSortField, SortDirection, NewBook, Book } from "../typ
 import { BookForm } from "../components/BookForm";
 import { createBook, updateBook, deleteBook } from "../utils/bookService";
 import { useNavigate } from 'react-router-dom';
+import { AuthorizedAction } from "../components/AuthorizedAction";
 
 export const Reviews = () => {
   // State for sorting and filtering
@@ -149,12 +150,23 @@ export const Reviews = () => {
     <div className="w-full">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-4xl font-bold">Book Reviews</h1>
-        <button
-          onClick={() => setShowModal(true)}
-          className="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700 transition-colors dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent"
+        <AuthorizedAction
+          fallback={
+            <button
+              onClick={() => navigate('/login?returnUrl=/reviews')}
+              className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+            >
+              Login to Add Review
+            </button>
+          }
         >
-          New Review
-        </button>
+          <button
+            onClick={() => setShowModal(true)}
+            className="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700 transition-colors dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent"
+          >
+            New Review
+          </button>
+        </AuthorizedAction>
       </div>
       {/* Modal for New/Edit Review */}
       {showModal && (
@@ -248,36 +260,45 @@ export const Reviews = () => {
           <p className="mt-4 text-gray-600 dark:text-gray-400">Loading reviews...</p>
         </div>
       )}
+
       {error && (
-        <div className="bg-red-100 text-red-700 p-4 rounded mb-6">
-          <p className="font-semibold">Error loading reviews:</p>
-          <p>{error.message}</p>
+        <div className="p-4 bg-red-100 text-red-700 rounded mb-6 dark:bg-red-900 dark:text-red-200">
+          <p>Error loading reviews: {error.toString()}</p>
         </div>
       )}
+
       {!loading && !error && books.length === 0 && (
         <div className="text-center py-8">
-          <p className="text-gray-600 dark:text-gray-400">No reviews found. Try adjusting your search or filters.</p>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">No reviews found.</p>
+          <AuthorizedAction>
+            <button
+              onClick={() => setShowModal(true)}
+              className="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700 transition-colors dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent"
+            >
+              Add the First Review
+            </button>
+          </AuthorizedAction>
         </div>
       )}
+
       {!loading && !error && books.length > 0 && (
-        <p className="text-gray-600 dark:text-gray-400 mb-4">
-          Showing {books.length} of {totalCount} reviews
-        </p>
-      )}
-      {/* Books Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 justify-items-center">
-        {books.map((book) => (
-          <div key={book.id} className="w-[180px] h-[270px]">
-            <BookCard 
-              book={book} 
-              onEdit={handleEditBook}
-              onDelete={handleDeleteBook}
-            />
+        <>
+          <p className="text-gray-700 dark:text-gray-300 mb-4">
+            Found {totalCount} {totalCount === 1 ? 'review' : 'reviews'}
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {books.map((book) => (
+              <BookCard 
+                key={book.id} 
+                book={book} 
+                onEdit={() => handleEditBook(book)}
+                onDelete={() => handleDeleteBook(book)}
+              />
+            ))}
           </div>
-        ))}
-      </div>
-      {/* Pagination */}
-      {renderPagination()}
+          {renderPagination()}
+        </>
+      )}
     </div>
   );
 }; 

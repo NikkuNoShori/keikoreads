@@ -1,6 +1,7 @@
 // import { Link } from 'react-router-dom';
 import { DarkModeToggle } from './DarkModeToggle';
 import { SmartLink } from './SmartLink';
+import { UserProfile } from './UserProfile';
 
 interface HeaderProps {
   isDarkMode: boolean;
@@ -22,7 +23,7 @@ export const Header = ({ isDarkMode, toggleDarkMode }: HeaderProps) => {
           className="w-56 max-w-xs h-auto mb-2 mx-auto drop-shadow-lg dark:filter dark:invert"
         />
       </div>
-      {/* Navigation with dark mode toggle on right */}
+      {/* Navigation with dark mode toggle and user profile on right */}
       <nav className="relative z-10 w-full border-t border-b border-rose-gold py-1 bg-white/80 dark:bg-gray-800/80 flex items-center justify-center">
         <ul className="flex flex-row justify-center items-center gap-2 m-0 p-0 list-none flex-1">
           {['Home', 'About', 'Reviews', 'Contact'].map((label, idx, arr) => (
@@ -43,7 +44,8 @@ export const Header = ({ isDarkMode, toggleDarkMode }: HeaderProps) => {
             </li>
           ))}
         </ul>
-        <div className="flex items-center pr-4">
+        <div className="flex items-center space-x-4 pr-4">
+          <UserProfile />
           <DarkModeToggle isDarkMode={isDarkMode} onToggle={toggleDarkMode} />
         </div>
       </nav>

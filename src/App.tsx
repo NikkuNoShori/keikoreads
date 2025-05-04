@@ -2,6 +2,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { AppRoutes } from './routes';
+import { AuthProvider } from './context/AuthContext';
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -29,11 +30,13 @@ function App() {
   };
 
   return (
-    <Router>
-      <Layout isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode}>
-        <AppRoutes />
-      </Layout>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Layout isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode}>
+          <AppRoutes />
+        </Layout>
+      </Router>
+    </AuthProvider>
   );
 }
 

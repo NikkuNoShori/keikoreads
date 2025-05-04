@@ -4,6 +4,7 @@ import { formatDate } from '../utils/formatters';
 import { SmartLink } from './SmartLink';
 import { BookCover } from './BookCover';
 import { BookMenu } from './BookMenu';
+import { AuthorizedAction } from './AuthorizedAction';
 
 interface BookCardProps {
   book: Book;
@@ -52,11 +53,13 @@ export const BookCard = ({ book, onEdit, onDelete }: BookCardProps) => {
       {/* Menu (if edit/delete handlers are provided) */}
       {(onEdit || onDelete) && (
         <div className="absolute top-2 right-2 z-10">
-          <BookMenu 
-            book={book} 
-            onEdit={book => onEdit?.(book)} 
-            onDelete={book => onDelete?.(book)} 
-          />
+          <AuthorizedAction>
+            <BookMenu 
+              book={book} 
+              onEdit={book => onEdit?.(book)} 
+              onDelete={book => onDelete?.(book)} 
+            />
+          </AuthorizedAction>
         </div>
       )}
       
