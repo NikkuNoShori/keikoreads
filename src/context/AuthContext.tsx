@@ -4,7 +4,7 @@ import { Provider } from '@supabase/supabase-js';
 
 interface AuthContextType extends AuthState {
   signIn: (email: string, password: string) => Promise<{ data: unknown; error: unknown }>;
-  signInWithOAuth: (provider: Provider) => Promise<{ data: unknown; error: unknown }>;
+  signInWithOAuth: (provider: Provider, isSignUp?: boolean) => Promise<{ data: unknown; error: unknown }>;
   signUp: (email: string, password: string) => Promise<{ data: unknown; error: unknown }>;
   signOut: () => Promise<{ error: unknown }>;
   isAuthenticated: boolean;

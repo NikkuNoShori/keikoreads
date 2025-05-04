@@ -10,9 +10,19 @@ interface BookCardProps {
   book: Book;
   onEdit?: (book: Book) => void;
   onDelete?: (book: Book) => void;
+  selectMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: (bookId: string) => void;
 }
 
-export const BookCard = ({ book, onEdit, onDelete }: BookCardProps) => {
+export const BookCard = ({ 
+  book, 
+  onEdit, 
+  onDelete, 
+  selectMode = false,
+  isSelected = false,
+  onToggleSelect
+}: BookCardProps) => {
   // Generate star rating
   const renderStars = (rating: number) => {
     const stars = [];
@@ -48,10 +58,35 @@ export const BookCard = ({ book, onEdit, onDelete }: BookCardProps) => {
       : book.series
     : null;
 
+  const handleCardClick = () => {
+    if (selectMode && onToggleSelect) {
+      onToggleSelect(book.id);
+    }
+  };
+
   return (
-    <div className="w-full h-full bg-white dark:bg-maroon-container shadow-md overflow-hidden flex flex-col transition-transform duration-300 hover:shadow-lg group relative">
+    <div 
+      className={`w-full h-full bg-white dark:bg-maroon-container shadow-md overflow-hidden flex flex-col transition-all duration-300 hover:shadow-lg group relative
+        ${selectMode ? 'cursor-pointer' : ''}
+        ${selectMode && isSelected ? 'ring-2 ring-rose-500 ring-offset-2 dark:ring-maroon-card dark:ring-offset-1' : ''}
+      `}
+      onClick={handleCardClick}
+    >
+      {/* Checkbox for selection */}
+      {selectMode && (
+        <div className="absolute top-2 left-2 z-10">
+          <div className="w-5 h-5 bg-white dark:bg-gray-800 rounded-sm border border-gray-300 dark:border-gray-600 flex items-center justify-center">
+            {isSelected && (
+              <svg className="w-4 h-4 text-rose-600 dark:text-maroon-card" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Menu (if edit/delete handlers are provided) */}
-      {(onEdit || onDelete) && (
+      {(onEdit || onDelete) && !selectMode && (
         <div className="absolute top-2 right-2 z-10">
           <AuthorizedAction>
             <BookMenu 
@@ -69,13 +104,18 @@ export const BookCard = ({ book, onEdit, onDelete }: BookCardProps) => {
           coverImage={book.cover_image || ''} 
           title={book.title}
           className="h-full shadow"
+          size="md"
         />
         {/* Overlay info section, contained within the image area */}
         <div className="absolute bottom-0 left-0 right-0 bg-gray-400/95 px-2 py-1.5 transition-all duration-300 flex flex-col justify-start group-hover:bg-gray-500/95 min-h-0">
           <h2 className="text-sm font-semibold text-white mb-0.5 line-clamp-1 text-left">
-            <SmartLink to={`/reviews/${book.id}`} className="hover:underline">
-              {book.title}
-            </SmartLink>
+            {!selectMode ? (
+              <SmartLink to={`/reviews/${book.id}`} className="hover:underline">
+                {book.title}
+              </SmartLink>
+            ) : (
+              book.title
+            )}
           </h2>
           <p className="text-white/90 text-xs mb-0.5 leading-tight text-left line-clamp-1">by {book.author}</p>
           

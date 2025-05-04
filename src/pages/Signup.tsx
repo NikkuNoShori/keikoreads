@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuthContext } from '../context/AuthContext';
 import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { SmartLink } from '../components/SmartLink';
@@ -12,6 +12,7 @@ export const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [oauthLoading, setOAuthLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   
   const { signUp, signInWithOAuth, isAuthenticated } = useAuthContext();
@@ -21,6 +22,21 @@ export const Signup = () => {
   // Get the returnUrl from query params or default to home
   const searchParams = new URLSearchParams(location.search);
   const returnUrl = searchParams.get('returnUrl') || '/';
+  
+  // Check for auth errors from OAuth on component mount
+  useEffect(() => {
+    const authError = localStorage.getItem('authError');
+    if (authError) {
+      setError(authError);
+      localStorage.removeItem('authError');
+    }
+    
+    const authWarning = localStorage.getItem('authWarning');
+    if (authWarning) {
+      setWarning(authWarning);
+      localStorage.removeItem('authWarning');
+    }
+  }, []);
   
   // If already authenticated, redirect to home
   if (isAuthenticated) {
@@ -70,7 +86,7 @@ export const Signup = () => {
       // Store the returnUrl in localStorage so we can access it after the OAuth redirect
       localStorage.setItem('authReturnUrl', returnUrl);
       
-      const { error } = await signInWithOAuth('google');
+      const { error } = await signInWithOAuth('google', true);
       
       if (error) {
         throw error;
@@ -94,6 +110,12 @@ export const Signup = () => {
       {error && (
         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded dark:bg-red-900 dark:text-red-200">
           {error}
+        </div>
+      )}
+      
+      {warning && (
+        <div className="mb-4 p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded dark:bg-yellow-900 dark:text-yellow-200">
+          {warning}
         </div>
       )}
       

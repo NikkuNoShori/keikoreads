@@ -6,7 +6,7 @@ dotenv.config();
 
 // Get environment variables or use defaults
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+const supabaseServiceKey = process.env.VITE_SUPABASE_SERVICE_KEY;
 
 if (!supabaseServiceKey) {
   console.error('Error: SUPABASE_SERVICE_KEY environment variable is required.');

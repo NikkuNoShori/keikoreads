@@ -4,26 +4,36 @@ interface BookCoverProps {
   coverImage: string;
   title: string;
   className?: string;
+  size?: 'sm' | 'md' | 'lg';
 }
+
+// Standard sizes for book covers to maintain consistency across the app
+const sizeClasses = {
+  sm: 'max-h-32',
+  md: 'max-h-48',
+  lg: 'max-h-64',
+};
 
 export const BookCover: React.FC<BookCoverProps> = ({ 
   coverImage, 
   title, 
-  className = ''
+  className = '', 
+  size = 'md'
 }) => {
-  // Default image if none is provided
-  const imageSrc = coverImage || '/assets/book-placeholder.svg';
+  const defaultImage = '/assets/default-book-cover.png';
+  const sizeClass = sizeClasses[size] || '';
   
-  // Standard book aspect ratio is typically around 2:3 (width:height)
   return (
-    <div className={`book-cover-container aspect-[2/3] shadow overflow-hidden h-full ${className}`}>
-      <img 
-        src={imageSrc} 
-        alt={`${title} cover`} 
-        className="w-full h-full object-cover object-center"
-        loading="lazy"
+    <div 
+      className={`h-full w-full relative overflow-hidden bg-gray-100 dark:bg-gray-700 ${className}`}
+    >
+      <img
+        src={coverImage || defaultImage}
+        alt={`Cover for ${title}`}
+        className={`w-full h-full object-cover ${sizeClass}`}
         onError={(e) => {
-          e.currentTarget.src = '/assets/book-placeholder.svg';
+          // If image fails to load, set to default
+          (e.target as HTMLImageElement).src = defaultImage;
         }}
       />
     </div>

@@ -137,21 +137,52 @@ export const useAuth = () => {
 
     getInitialSession();
 
+    // Track if component is mounted to prevent state updates after unmount
+    let isMounted = true;
+
+    // Create a debounced session checker
+    let sessionCheckTimer: NodeJS.Timeout | null = null;
+
+    const debouncedSessionCheck = () => {
+      if (sessionCheckTimer) clearTimeout(sessionCheckTimer);
+      sessionCheckTimer = setTimeout(() => {
+        if (isMounted) {
+          supabase.auth.getSession().catch(console.error);
+        }
+      }, 2000); // 2 second debounce
+    };
+
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setAuthState((prev) => ({
-        ...prev,
-        session,
-        user: session?.user || null,
-        loading: false,
-      }));
+      if (isMounted) {
+        setAuthState((prev) => ({
+          ...prev,
+          session,
+          user: session?.user || null,
+          loading: false,
+        }));
+      }
     });
 
-    // Cleanup subscription
+    // Handle visibility change
+    const handleVisibilityChange = () => {
+      // Only trigger session check if page becomes visible
+      if (document.visibilityState === "visible") {
+        debouncedSessionCheck();
+      }
+    };
+
+    // Add visibility change listener
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // Cleanup subscription and visibility listener
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      if (sessionCheckTimer) clearTimeout(sessionCheckTimer);
     };
   }, []);
 
@@ -185,8 +216,26 @@ export const useAuth = () => {
     }
   };
 
-  const signInWithOAuth = async (provider: Provider) => {
+  const signInWithOAuth = async (
+    provider: Provider,
+    isSignUp: boolean = false
+  ) => {
     try {
+      // For OAuth we need to check if this is a sign up or sign in attempt
+      // If the caller specifies it's a sign up, we need to store the intent
+      // to verify after getting the user's info in the callback
+      if (isSignUp) {
+        localStorage.setItem("oauthIntent", "signup");
+      } else {
+        localStorage.setItem("oauthIntent", "signin");
+      }
+
+      // Store the returnUrl in localStorage so we can access it after the OAuth redirect
+      const returnUrl = window.location.pathname;
+      if (returnUrl !== "/login" && returnUrl !== "/signup") {
+        localStorage.setItem("authReturnUrl", returnUrl);
+      }
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
@@ -254,6 +303,52 @@ export const useAuth = () => {
       await fetchProfile(authState.user);
     }
   };
+
+  // Handle OAuth callback verification
+  const checkOAuthCallback = async (user: User) => {
+    if (!user || !user.email) return;
+
+    const oauthIntent = localStorage.getItem("oauthIntent");
+    if (!oauthIntent) return;
+
+    // Clear the intent regardless of what happens
+    localStorage.removeItem("oauthIntent");
+
+    // Check if the user exists in our profiles table
+    const userExists = await checkUserExists(user.email);
+
+    if (oauthIntent === "signup" && userExists) {
+      // User tried to sign up but already exists
+      // We can't stop the auth flow at this point, but we can show an error message
+      localStorage.setItem(
+        "authError",
+        "An account with this email already exists. Please sign in instead."
+      );
+      // They've actually been signed in by Supabase already, so redirect to home or profile
+      // after showing the error message on the next page
+    } else if (oauthIntent === "signin" && !userExists) {
+      // User tried to sign in but doesn't exist
+      // We need to create their profile since they authenticated successfully
+      await upsertProfileFromOAuth(user);
+      localStorage.setItem(
+        "authWarning",
+        "New account created with your OAuth provider."
+      );
+    } else if (oauthIntent === "signin" && userExists) {
+      // Normal sign in flow - just update the profile with latest OAuth data
+      await upsertProfileFromOAuth(user);
+    } else if (oauthIntent === "signup" && !userExists) {
+      // Normal sign up flow - create the profile
+      await upsertProfileFromOAuth(user);
+    }
+  };
+
+  // Add this to the useEffect that watches authState.user
+  useEffect(() => {
+    if (authState.user) {
+      checkOAuthCallback(authState.user).catch(console.error);
+    }
+  }, [authState.user]);
 
   return {
     ...authState,
