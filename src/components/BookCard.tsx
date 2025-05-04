@@ -48,7 +48,7 @@ export const BookCard = ({ book, onEdit, onDelete }: BookCardProps) => {
     : null;
 
   return (
-    <div className="w-full bg-white dark:bg-maroon-container shadow-md overflow-hidden flex flex-col transition-transform duration-300 hover:shadow-lg group relative">
+    <div className="w-full h-full bg-white dark:bg-maroon-container shadow-md overflow-hidden flex flex-col transition-transform duration-300 hover:shadow-lg group relative">
       {/* Menu (if edit/delete handlers are provided) */}
       {(onEdit || onDelete) && (
         <div className="absolute top-2 right-2 z-10">
@@ -60,11 +60,12 @@ export const BookCard = ({ book, onEdit, onDelete }: BookCardProps) => {
         </div>
       )}
       
-      {/* Cover Image */}
-      <div className="relative overflow-hidden w-full">
+      {/* Cover Image - fixed aspect ratio */}
+      <div className="aspect-[2/3] w-full relative overflow-hidden">
         <BookCover 
           coverImage={book.cover_image || ''} 
           title={book.title}
+          className="h-full shadow"
         />
         {/* Overlay info section, contained within the image area */}
         <div className="absolute bottom-0 left-0 right-0 bg-gray-400/95 px-2 py-1.5 transition-all duration-300 flex flex-col justify-start group-hover:bg-gray-500/95 min-h-0">

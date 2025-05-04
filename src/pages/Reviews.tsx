@@ -265,14 +265,15 @@ export const Reviews = () => {
         </p>
       )}
       {/* Books Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 justify-items-center">
         {books.map((book) => (
-          <BookCard 
-            key={book.id} 
-            book={book} 
-            onEdit={handleEditBook}
-            onDelete={handleDeleteBook}
-          />
+          <div key={book.id} className="w-[180px] h-[270px]">
+            <BookCard 
+              book={book} 
+              onEdit={handleEditBook}
+              onDelete={handleDeleteBook}
+            />
+          </div>
         ))}
       </div>
       {/* Pagination */}

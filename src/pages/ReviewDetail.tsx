@@ -5,6 +5,7 @@ import { getBookById, deleteBook, updateBook } from '../utils/bookService';
 import { formatDate, formatExternalLink } from '../utils/formatters';
 import { SmartLink } from '../components/SmartLink';
 import { BookForm } from '../components/BookForm';
+import { BookCover } from '../components/BookCover';
 
 export const ReviewDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -145,14 +146,13 @@ export const ReviewDetail = () => {
       <div className="flex flex-col md:flex-row gap-6 mb-6">
         {/* Cover Image */}
         <div className="w-full md:w-1/4">
-          <img 
-            src={book.cover_image || '/assets/book-placeholder.svg'} 
-            alt={`${book.title} cover`}
-            className="w-full h-auto shadow-md"
-            onError={(e) => {
-              e.currentTarget.src = '/assets/book-placeholder.svg';
-            }}
-          />
+          <div className="max-w-[220px] mx-auto md:mx-0">
+            <BookCover 
+              coverImage={book.cover_image || ''} 
+              title={book.title}
+              className="w-full shadow-md"
+            />
+          </div>
         </div>
         
         {/* Book Info */}
@@ -301,14 +301,16 @@ export const ReviewDetail = () => {
       {book.read_alikes_image && (
         <div className="mb-6">
           <h2 className="text-xl font-semibold mb-2">Similar Reads</h2>
-          <img
-            src={book.read_alikes_image}
-            alt="Similar book recommendations"
-            className="max-w-full h-auto shadow-md"
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-            }}
-          />
+          <div className="overflow-hidden shadow-md rounded">
+            <img
+              src={book.read_alikes_image}
+              alt="Similar book recommendations"
+              className="w-full h-auto object-contain"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+          </div>
         </div>
       )}
       

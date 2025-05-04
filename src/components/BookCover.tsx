@@ -15,13 +15,13 @@ export const BookCover: React.FC<BookCoverProps> = ({
   const imageSrc = coverImage || '/assets/book-placeholder.svg';
   
   // Standard book aspect ratio is typically around 2:3 (width:height)
-  // Using aspect-[2/3] for precise ratio control
   return (
-    <div className={`book-cover-container aspect-[2/3] shadow overflow-hidden ${className}`}>
+    <div className={`book-cover-container aspect-[2/3] shadow overflow-hidden h-full ${className}`}>
       <img 
         src={imageSrc} 
         alt={`${title} cover`} 
-        className="w-full h-full object-cover"
+        className="w-full h-full object-cover object-center"
+        loading="lazy"
         onError={(e) => {
           e.currentTarget.src = '/assets/book-placeholder.svg';
         }}

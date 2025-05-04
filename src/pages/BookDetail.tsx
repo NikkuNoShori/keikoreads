@@ -44,10 +44,11 @@ export const BookDetail = () => {
       <div className="flex flex-col md:flex-row gap-4 p-4">
         {/* Book Info Sidebar */}
         <aside className="book-info flex-shrink-0 w-full md:w-64 flex flex-col items-center md:items-start">
-          <div className="w-48 mb-6">
+          <div className="w-full max-w-[180px] mb-6">
             <BookCover 
               coverImage={book.cover_image || ''} 
               title={book.title}
+              className="shadow-md"
             />
           </div>
           <div className="book-details mb-4 w-full">
