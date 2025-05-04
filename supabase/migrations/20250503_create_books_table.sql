@@ -1,36 +1,36 @@
--- Create books table with expanded metadata
+-- Create books table with Supabase naming conventions and required fields
 CREATE TABLE IF NOT EXISTS books (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  title TEXT NOT NULL,
-  author TEXT NOT NULL,
-  series TEXT,
-  genre TEXT,
-  publish_date DATE,
-  pages INTEGER,
-  rating INTEGER CHECK (rating >= 1 AND rating <= 5),
-  description TEXT,
-  review TEXT,
-  review_date DATE DEFAULT CURRENT_DATE,
-  cover_image TEXT,
-  goodreads_link TEXT,
-  storygraph_link TEXT,
-  bookshop_link TEXT,
-  barnes_noble_link TEXT,
-  read_alikes_image TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  title text NOT NULL,
+  author text NOT NULL,
+  series text,
+  genre text NOT NULL,
+  publish_date date NOT NULL,
+  pages integer CHECK (pages IS NULL OR pages > 0),
+  rating integer NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  description text,
+  review text,
+  review_date date DEFAULT CURRENT_DATE,
+  cover_image text,
+  goodreads_link text,
+  storygraph_link text,
+  bookshop_link text,
+  barnes_noble_link text,
+  read_alikes_image text,
+  created_at timestamptz DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamptz DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE books ENABLE ROW LEVEL SECURITY;
 
 -- Create policy to allow anyone to read books (but only admin can edit)
-CREATE POLICY "Allow anonymous read access" ON books
+CREATE POLICY "allow_anonymous_read_access" ON books
   FOR SELECT USING (true);
 
 -- Create function to automatically update the updated_at column
 CREATE OR REPLACE FUNCTION update_modified_column()
-RETURNS TRIGGER AS $$
+RETURNS trigger AS $$
 BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;

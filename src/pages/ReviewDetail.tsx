@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Book } from '../types/BookTypes';
-import { getBookById, deleteBook } from '../utils/bookService';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Book, NewBook } from '../types/BookTypes';
+import { getBookById, deleteBook, updateBook } from '../utils/bookService';
 import { formatDate, formatExternalLink } from '../utils/formatters';
 import { SmartLink } from '../components/SmartLink';
+import { BookForm } from '../components/BookForm';
 
 export const ReviewDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -13,6 +14,9 @@ export const ReviewDetail = () => {
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -55,6 +59,33 @@ export const ReviewDetail = () => {
       console.error('Error deleting book:', err);
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
       setIsDeleting(false);
+      setShowConfirmDelete(false);
+    }
+  };
+
+  const handleEdit = () => {
+    setShowEditModal(true);
+  };
+
+  const handleUpdateBook = async (bookData: NewBook) => {
+    if (!id || !book) return;
+    
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await updateBook(id, bookData);
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Update the book state with the edited data
+      setBook(data);
+      setShowEditModal(false);
+    } catch (err) {
+      console.error('Error updating book:', err);
+      setError(err instanceof Error ? err.message : 'An unknown error occurred');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -109,31 +140,31 @@ export const ReviewDetail = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-1.5 py-2.5">
       {/* Book Header */}
-      <div className="flex flex-col md:flex-row gap-8 mb-10">
+      <div className="flex flex-col md:flex-row gap-6 mb-6">
         {/* Cover Image */}
-        <div className="w-full md:w-1/3">
+        <div className="w-full md:w-1/4">
           <img 
-            src={book.cover_image || '/assets/book-placeholder.jpg'} 
+            src={book.cover_image || '/assets/book-placeholder.svg'} 
             alt={`${book.title} cover`}
-            className="w-full h-auto rounded-lg shadow-md"
+            className="w-full h-auto shadow-md"
             onError={(e) => {
-              e.currentTarget.src = '/assets/book-placeholder.jpg';
+              e.currentTarget.src = '/assets/book-placeholder.svg';
             }}
           />
         </div>
         
         {/* Book Info */}
-        <div className="w-full md:w-2/3">
-          <h1 className="text-3xl font-bold mb-2">{book.title}</h1>
-          <p className="text-xl text-gray-700 dark:text-gray-300 mb-4">
+        <div className="w-full md:w-3/4">
+          <h1 className="text-2xl font-bold mb-1">{book.title}</h1>
+          <p className="text-lg text-gray-700 dark:text-gray-300 mb-2">
             by {book.author}
             {book.series && <span className="italic"> ({book.series})</span>}
           </p>
           
           {/* Rating */}
-          <div className="flex items-center mb-4">
+          <div className="flex items-center mb-3">
             {renderStars(book.rating)}
             <span className="ml-2 text-gray-600 dark:text-gray-400">
               {book.rating}/5
@@ -141,7 +172,7 @@ export const ReviewDetail = () => {
           </div>
           
           {/* Metadata Grid */}
-          <div className="grid grid-cols-2 gap-x-4 gap-y-2 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-3 gap-y-1 mb-4">
             {book.genre && (
               <div>
                 <span className="text-gray-600 dark:text-gray-400">Genre:</span>{' '}
@@ -172,36 +203,36 @@ export const ReviewDetail = () => {
           </div>
           
           {/* External Links */}
-          <div className="flex flex-wrap gap-3 mb-6">
+          <div className="flex flex-wrap gap-2 mb-4">
             {book.goodreads_link && (
-              <SmartLink to={formatExternalLink(book.goodreads_link)} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Goodreads</SmartLink>
+              <SmartLink to={formatExternalLink(book.goodreads_link)} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Goodreads</SmartLink>
             )}
             
             {book.storygraph_link && (
-              <SmartLink to={formatExternalLink(book.storygraph_link)} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">StoryGraph</SmartLink>
+              <SmartLink to={formatExternalLink(book.storygraph_link)} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">StoryGraph</SmartLink>
             )}
             
             {book.bookshop_link && (
-              <SmartLink to={formatExternalLink(book.bookshop_link)} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Bookshop.org</SmartLink>
+              <SmartLink to={formatExternalLink(book.bookshop_link)} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Bookshop.org</SmartLink>
             )}
             
             {book.barnes_noble_link && (
-              <SmartLink to={formatExternalLink(book.barnes_noble_link)} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Barnes & Noble</SmartLink>
+              <SmartLink to={formatExternalLink(book.barnes_noble_link)} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Barnes & Noble</SmartLink>
             )}
           </div>
           
           {/* Action Buttons */}
-          <div className="flex gap-4">
-            <Link
-              to={`/reviews/${book.id}/edit`}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+          <div className="flex gap-3">
+            <button
+              onClick={handleEdit}
+              className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors text-sm"
             >
               Edit Review
-            </Link>
+            </button>
             
             <button
               onClick={() => setShowConfirmDelete(true)}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
+              className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded transition-colors text-sm"
               disabled={isDeleting}
             >
               {isDeleting ? 'Deleting...' : 'Delete Review'}
@@ -211,20 +242,55 @@ export const ReviewDetail = () => {
       </div>
       
       {/* Description and Review */}
-      <div className="space-y-8 mb-10">
+      <div className="space-y-4 mb-6">
         {book.description && (
           <div>
-            <h2 className="text-2xl font-semibold mb-3">Description</h2>
-            <div className="prose dark:prose-invert max-w-none">
-              <p>{book.description}</p>
+            {/* Description divider similar to the Review divider */}
+            <div className="relative flex items-center py-4">
+              <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+              <span className="flex-shrink mx-3 text-gray-600 dark:text-gray-400 font-serif font-medium tracking-wide text-sm">Description</span>
+              <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
             </div>
+            <div className="prose prose-xs text-sm dark:prose-invert max-w-none font-serif leading-relaxed">
+              {book.description.length > 150 && !showFullDescription ? (
+                <>
+                  <p className="line-clamp-5">{book.description}</p>
+                  <button 
+                    onClick={() => setShowFullDescription(true)}
+                    className="text-blue-600 hover:underline text-xs font-medium mt-1 font-sans"
+                  >
+                    View more
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p>{book.description}</p>
+                  {book.description.length > 150 && (
+                    <button 
+                      onClick={() => setShowFullDescription(false)}
+                      className="text-blue-600 hover:underline text-xs font-medium mt-1 font-sans"
+                    >
+                      View less
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {/* Divider with Review in the middle */}
+        {book.review && (
+          <div className="relative flex items-center py-4">
+            <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+            <span className="flex-shrink mx-3 text-gray-600 dark:text-gray-400 font-medium text-sm">Review</span>
+            <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
           </div>
         )}
         
         {book.review && (
           <div>
-            <h2 className="text-2xl font-semibold mb-3">Review</h2>
-            <div className="prose dark:prose-invert max-w-none">
+            <div className="prose prose-sm dark:prose-invert max-w-none font-serif italic">
               <p>{book.review}</p>
             </div>
           </div>
@@ -233,12 +299,12 @@ export const ReviewDetail = () => {
       
       {/* Read-Alikes Image */}
       {book.read_alikes_image && (
-        <div className="mb-10">
-          <h2 className="text-2xl font-semibold mb-3">Similar Reads</h2>
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-2">Similar Reads</h2>
           <img
             src={book.read_alikes_image}
             alt="Similar book recommendations"
-            className="max-w-full h-auto rounded-lg shadow-md"
+            className="max-w-full h-auto shadow-md"
             onError={(e) => {
               e.currentTarget.style.display = 'none';
             }}
@@ -247,11 +313,29 @@ export const ReviewDetail = () => {
       )}
       
       {/* Back to Reviews */}
-      <div className="mt-10">
+      <div className="mt-6">
         <SmartLink to="/reviews" className="text-rose-600 hover:underline">
           ← Back to All Reviews
         </SmartLink>
       </div>
+      
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 shadow-2xl rounded-2xl max-w-md w-full p-1 relative max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-white dark:scrollbar-thumb-maroon-card dark:scrollbar-track-gray-900">
+            <h2 className="text-2xl font-semibold font-serif italic text-center bg-transparent dark:bg-gray-800 py-2 rounded-t-2xl">
+              Edit Book Review
+            </h2>
+            <div className="h-1 w-24 bg-maroon-card rounded-full mx-auto mb-0"></div>
+            <BookForm 
+              initialData={book} 
+              onSubmit={handleUpdateBook} 
+              onCancel={() => setShowEditModal(false)} 
+              isSubmitting={isSubmitting} 
+            />
+          </div>
+        </div>
+      )}
       
       {/* Delete Confirmation Modal */}
       {showConfirmDelete && (
