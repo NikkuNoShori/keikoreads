@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { BookCard } from "../components/BookCard";
 import { useBooks } from "../hooks/useBooks";
-import { BookFilters, BookSortField, SortDirection } from "../types/BookTypes";
-import { ReviewForm } from "../components/ReviewForm";
+import { BookFilters, BookSortField, SortDirection, NewBook, Book } from "../types/BookTypes";
+import { BookForm } from "../components/BookForm";
+import { createBook, updateBook, deleteBook } from "../utils/bookService";
+import { useNavigate } from 'react-router-dom';
 
 export const Reviews = () => {
   // State for sorting and filtering
@@ -11,6 +13,10 @@ export const Reviews = () => {
   const [filters, setFilters] = useState<BookFilters>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [editingBook, setEditingBook] = useState<Book | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [bookToDelete, setBookToDelete] = useState<Book | null>(null);
 
   // Get books using our custom hook
   const {
@@ -23,6 +29,8 @@ export const Reviews = () => {
     setCurrentPage,
     pageSize,
   } = useBooks(sortField, sortDirection, filters);
+
+  const navigate = useNavigate();
 
   // Handle sort changes
   const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -40,9 +48,71 @@ export const Reviews = () => {
   };
 
   // Handle new review submit
-  const handleNewReview = async () => {
+  const handleBookSubmit = async (bookData: NewBook) => {
+    setIsSubmitting(true);
+    try {
+      if (editingBook) {
+        // Update existing book
+        const { data, error } = await updateBook(editingBook.id, bookData);
+        if (!error && data) {
+          await fetchBooks();
+          closeModal();
+          // If we're on the review page, navigate to refresh the data
+          if (window.location.pathname === `/reviews/${data.id}`) {
+            navigate(`/reviews/${data.id}`);
+          }
+        } else {
+          alert(error?.message || 'Error updating review');
+        }
+      } else {
+        // Create new book
+        const { data, error } = await createBook(bookData);
+        if (!error && data) {
+          await fetchBooks();
+          closeModal();
+          // Redirect to the new review detail page
+          navigate(`/reviews/${data.id}`);
+        } else {
+          alert(error?.message || 'Error creating review');
+        }
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle edit book
+  const handleEditBook = (book: Book) => {
+    setEditingBook(book);
+    setShowModal(true);
+  };
+
+  // Handle delete book
+  const handleDeleteBook = (book: Book) => {
+    setBookToDelete(book);
+    setShowDeleteConfirm(true);
+  };
+
+  // Confirm delete book
+  const confirmDelete = async () => {
+    if (!bookToDelete) return;
+    
+    const { error } = await deleteBook(bookToDelete.id);
+    if (!error) {
+      await fetchBooks();
+      setShowDeleteConfirm(false);
+      setBookToDelete(null);
+    } else {
+      alert(`Error deleting review: ${error.message}`);
+    }
+  };
+
+  // Close all modals
+  const closeModal = () => {
     setShowModal(false);
-    await fetchBooks();
+    setEditingBook(null);
+    setShowDeleteConfirm(false);
+    setBookToDelete(null);
   };
 
   // Calculate total pages
@@ -81,42 +151,56 @@ export const Reviews = () => {
         <h1 className="text-4xl font-bold">Book Reviews</h1>
         <button
           onClick={() => setShowModal(true)}
-          className="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700 transition-colors"
+          className="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700 transition-colors dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent"
         >
           New Review
         </button>
       </div>
-      {/* Modal for New Review */}
+      {/* Modal for New/Edit Review */}
       {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 shadow-2xl rounded-2xl max-w-md w-full p-1 relative max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-white dark:scrollbar-thumb-maroon-card dark:scrollbar-track-gray-900">
+            <h2 className="text-2xl font-semibold font-serif italic text-center bg-transparent dark:bg-gray-800 py-2 rounded-t-2xl">
+              {editingBook ? 'Edit Book Review' : 'New Book Review'}
+            </h2>
+            <div className="h-1 w-24 bg-maroon-card rounded-full mx-auto mb-0"></div>
+            <BookForm 
+              initialData={editingBook || undefined}
+              onSubmit={handleBookSubmit} 
+              onCancel={closeModal} 
+              isSubmitting={isSubmitting} 
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && bookToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg max-w-xl w-full p-4 relative max-h-[80vh] overflow-y-auto">
-            <button
-              onClick={() => setShowModal(false)}
-              className="absolute top-2 right-2 text-gray-500 hover:text-rose-600 text-2xl font-bold"
-              aria-label="Close"
-            >
-              ×
-            </button>
-            <h2 className="text-2xl font-semibold mb-4">New Book Review</h2>
-            <ReviewForm onSubmit={handleNewReview} />
-            <div className="flex justify-end gap-4 mt-6">
+          <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg max-w-md w-full p-6 relative">
+            <h3 className="text-lg font-semibold mb-2">Confirm Delete</h3>
+            <p className="mb-4">
+              Are you sure you want to delete the review for <span className="font-semibold">{bookToDelete.title}</span>? 
+              This action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-3">
               <button
-                onClick={() => setShowModal(false)}
-                className="px-6 py-2 rounded bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-600 font-semibold text-base"
+                onClick={closeModal}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                Exit
+                Cancel
               </button>
               <button
-                form="review-form"
-                type="submit"
-                className="px-6 py-2 rounded bg-rose-600 text-white hover:bg-rose-700 font-semibold text-base"
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
               >
-                Save Review
+                Delete
               </button>
             </div>
           </div>
         </div>
       )}
+
       {/* Search and Filters */}
       <div className="mb-6 flex flex-col md:flex-row items-stretch md:items-center gap-4">
         <form onSubmit={handleSearch} className="flex-grow">
@@ -130,7 +214,7 @@ export const Reviews = () => {
             />
             <button
               type="submit"
-              className="px-4 py-2 bg-rose-600 text-white rounded-r hover:bg-rose-700"
+              className="px-4 py-2 bg-rose-600 text-white rounded-r hover:bg-rose-700 dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent"
             >
               Search
             </button>
@@ -181,9 +265,15 @@ export const Reviews = () => {
         </p>
       )}
       {/* Books Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 justify-items-center">
         {books.map((book) => (
-          <BookCard key={book.id} book={book} />
+          <div key={book.id} className="w-[180px] h-[270px]">
+            <BookCard 
+              book={book} 
+              onEdit={handleEditBook}
+              onDelete={handleDeleteBook}
+            />
+          </div>
         ))}
       </div>
       {/* Pagination */}

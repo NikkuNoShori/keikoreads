@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { createClient } from '@supabase/supabase-js';
 import { Book } from '../types/BookTypes';
 import { SmartLink } from '../components/SmartLink';
+import { BookCover } from '../components/BookCover';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -13,6 +14,7 @@ export const BookDetail = () => {
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showFullDescription, setShowFullDescription] = useState(false);
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -38,54 +40,125 @@ export const BookDetail = () => {
   if (error || !book) return <div className="text-center py-10 text-red-600">{error || 'Book not found.'}</div>;
 
   return (
-    <div className="max-w-4xl mx-auto bg-white dark:bg-maroon-container shadow-lg rounded-lg overflow-hidden mt-8">
-      <div className="flex flex-col md:flex-row gap-8 p-8">
+    <div className="max-w-4xl mx-auto bg-white dark:bg-maroon-container shadow-lg rounded-lg overflow-hidden mt-4">
+      <div className="flex flex-col md:flex-row gap-4 p-4">
         {/* Book Info Sidebar */}
-        <aside className="book-info flex-shrink-0 w-full md:w-64">
-          <img src={book.cover_image || '/assets/book-placeholder.jpg'} alt="Book Cover" className="book-cover w-full rounded-lg shadow mb-6 bg-white dark:bg-gray-800" />
-          <div className="book-details bg-gray-50 dark:bg-gray-900 rounded-lg p-4 mb-4">
-            <h2 className="text-lg font-semibold mb-2 text-gray-700 dark:text-maroon-text">Book Details</h2>
-            <p className="text-gray-700 dark:text-maroon-text"><span className="font-bold">Author:</span> {book.author}</p>
-            {book.series && <p className="text-gray-700 dark:text-maroon-text"><span className="font-bold">Series:</span> {book.series}</p>}
-            {book.genre && <p className="text-gray-700 dark:text-maroon-text"><span className="font-bold">Genre:</span> {book.genre}</p>}
-            {book.publish_date && <p className="text-gray-700 dark:text-maroon-text"><span className="font-bold">Published:</span> {book.publish_date.slice(0, 4)}</p>}
-            {book.pages && <p className="text-gray-700 dark:text-maroon-text"><span className="font-bold">Pages:</span> {book.pages}</p>}
+        <aside className="book-info flex-shrink-0 w-full md:w-64 flex flex-col items-center md:items-start">
+          <div className="w-full max-w-[180px] mb-6">
+            <BookCover 
+              coverImage={book.cover_image || ''} 
+              title={book.title}
+              className="shadow-md"
+            />
           </div>
-          <div className="rating bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-center mb-4">
-            <h3 className="text-base font-semibold mb-2 text-gray-700 dark:text-maroon-text">Rating</h3>
-            <div className="text-rose-600 text-xl mb-1">
-              {'★'.repeat(book.rating)}{'☆'.repeat(5 - book.rating)}
+          <div className="book-details mb-4 w-full">
+            <h2 className="text-lg font-semibold mb-3 text-gray-700 dark:text-maroon-text font-serif italic tracking-wide border-l-4 border-rose-100 dark:border-maroon-accent pl-2">Book Details</h2>
+            <div className="grid gap-1 pl-3">
+              <p className="text-gray-700 dark:text-maroon-text text-sm whitespace-nowrap overflow-hidden text-ellipsis">
+                <span className="font-bold inline-block w-20">Author:</span> {book.author}
+              </p>
+              {book.series && (
+                <p className="text-gray-700 dark:text-maroon-text text-sm whitespace-nowrap overflow-hidden text-ellipsis">
+                  <span className="font-bold inline-block w-20">Series:</span> {book.series}
+                </p>
+              )}
+              {book.genre && (
+                <p className="text-gray-700 dark:text-maroon-text text-sm whitespace-nowrap overflow-hidden text-ellipsis">
+                  <span className="font-bold inline-block w-20">Genre:</span> {book.genre}
+                </p>
+              )}
+              {book.publish_date && (
+                <p className="text-gray-700 dark:text-maroon-text text-sm whitespace-nowrap overflow-hidden text-ellipsis">
+                  <span className="font-bold inline-block w-20">Published:</span> {book.publish_date.slice(0, 4)}
+                </p>
+              )}
+              {book.pages && (
+                <p className="text-gray-700 dark:text-maroon-text text-sm whitespace-nowrap overflow-hidden text-ellipsis">
+                  <span className="font-bold inline-block w-20">Pages:</span> {book.pages}
+                </p>
+              )}
             </div>
-            <p className="text-gray-700 dark:text-maroon-text">{book.rating} out of 5</p>
+          </div>
+
+          {/* Rating Section */}
+          <div className="mb-4 w-full">
+            <div className="flex items-center border-l-4 border-rose-100 dark:border-maroon-accent pl-2">
+              <h2 className="text-lg font-semibold text-gray-700 dark:text-maroon-text font-serif italic tracking-wide mr-2">Rating:</h2>
+              <span className="text-rose-600 dark:text-maroon-accent">
+                {'★'.repeat(book.rating)}{'☆'.repeat(5 - book.rating)}
+              </span> 
+              <span className="ml-1 text-xs text-gray-500 dark:text-maroon-secondary">({book.rating}/5)</span>
+            </div>
           </div>
         </aside>
         {/* Main Content */}
         <main className="flex-1">
-          <div className="book-description bg-rose-50 dark:bg-gray-900 p-6 rounded-lg mb-6 italic text-gray-700 dark:text-maroon-text">
-            {book.description}
+          <div className="mb-3">
+            {/* Description divider similar to the Review divider */}
+            <div className="relative flex items-center py-3">
+              <div className="flex-grow border-t border-rose-100 dark:border-maroon-accent"></div>
+              <span className="flex-shrink mx-3 text-gray-500 dark:text-maroon-secondary font-serif font-medium tracking-wide text-sm">Description</span>
+              <div className="flex-grow border-t border-rose-100 dark:border-maroon-accent"></div>
+            </div>
+            <div className="p-3 italic text-gray-700 dark:text-maroon-text text-xs font-serif leading-relaxed">
+              {book.description && book.description.length > 150 && !showFullDescription ? (
+                <>
+                  <p className="line-clamp-5">{book.description}</p>
+                  <button 
+                    onClick={() => setShowFullDescription(true)}
+                    className="block text-blue-600 hover:underline text-xs font-medium mt-1 not-italic font-sans dark:text-maroon-accent"
+                  >
+                    View more
+                  </button>
+                </>
+              ) : (
+                <>
+                  {book.description}
+                  {book.description && book.description.length > 150 && (
+                    <button 
+                      onClick={() => setShowFullDescription(false)}
+                      className="block text-blue-600 hover:underline text-xs font-medium mt-1 not-italic font-sans dark:text-maroon-accent"
+                    >
+                      View less
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
           </div>
-          <hr className="border-t-2 border-rose-100 dark:border-gray-700 my-6" />
-          <div className="text-center text-gray-500 dark:text-maroon-text mb-4 text-sm italic">Thank you to Netgalley and the publisher for providing this ARC in exchange for an honest review!</div>
-          <div className="review-text text-gray-700 dark:text-maroon-text mb-6">
+          {/* Divider with Review in the middle */}
+          <div className="relative flex items-center py-3">
+            <div className="flex-grow border-t border-rose-100 dark:border-maroon-accent"></div>
+            <span className="flex-shrink mx-3 text-gray-500 dark:text-maroon-secondary font-medium text-sm">Review</span>
+            <div className="flex-grow border-t border-rose-100 dark:border-maroon-accent"></div>
+          </div>
+          
+          <div className="review-text text-gray-700 dark:text-maroon-text mb-5 font-serif italic">
             <p>{book.review}</p>
           </div>
+          
           {book.review_date && (
-            <div className="text-center text-gray-500 dark:text-maroon-text italic text-xs mb-6">Date posted: {book.review_date}</div>
+            <div className="text-center text-gray-500 dark:text-maroon-secondary italic text-xs mb-6">Date posted: {book.review_date}</div>
           )}
           {/* Book Links */}
           <div className="book-links flex justify-center gap-3 my-4">
             {book.goodreads_link && (
-              <SmartLink to={book.goodreads_link} className="book-link bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100 dark:hover:bg-maroon-text hover:text-gray-900 dark:hover:text-gray-900 transition-colors">Goodreads</SmartLink>
+              <SmartLink to={book.goodreads_link} className="book-link bg-gray-200 dark:bg-maroon-card px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100 dark:hover:bg-maroon-accent hover:text-gray-900 dark:hover:text-gray-900 transition-colors">Goodreads</SmartLink>
             )}
             {book.storygraph_link && (
-              <SmartLink to={book.storygraph_link} className="book-link bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100 dark:hover:bg-maroon-text hover:text-gray-900 dark:hover:text-gray-900 transition-colors">Storygraph</SmartLink>
+              <SmartLink to={book.storygraph_link} className="book-link bg-gray-200 dark:bg-maroon-card px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100 dark:hover:bg-maroon-accent hover:text-gray-900 dark:hover:text-gray-900 transition-colors">Storygraph</SmartLink>
             )}
             {book.bookshop_link && (
-              <SmartLink to={book.bookshop_link} className="book-link bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100 dark:hover:bg-maroon-text hover:text-gray-900 dark:hover:text-gray-900 transition-colors">Bookshop.org</SmartLink>
+              <SmartLink to={book.bookshop_link} className="book-link bg-gray-200 dark:bg-maroon-card px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100 dark:hover:bg-maroon-accent hover:text-gray-900 dark:hover:text-gray-900 transition-colors">Bookshop.org</SmartLink>
             )}
             {book.barnes_noble_link && (
-              <SmartLink to={book.barnes_noble_link} className="book-link bg-gray-200 dark:bg-gray-700 px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100 dark:hover:bg-maroon-text hover:text-gray-900 dark:hover:text-gray-900 transition-colors">Barnes & Noble</SmartLink>
+              <SmartLink to={book.barnes_noble_link} className="book-link bg-gray-200 dark:bg-maroon-card px-3 py-2 rounded text-xs font-semibold hover:bg-rose-100 dark:hover:bg-maroon-accent hover:text-gray-900 dark:hover:text-gray-900 transition-colors">Barnes & Noble</SmartLink>
             )}
+          </div>
+          
+          {/* Thank you note at the bottom of the column */}
+          <div className="text-center text-gray-500 dark:text-maroon-secondary mt-auto pt-4 text-xs italic whitespace-nowrap overflow-hidden text-ellipsis border-t border-rose-50 dark:border-maroon-accent/30">
+            Thanks to Netgalley & publisher for this ARC in exchange for honest review!
           </div>
         </main>
       </div>

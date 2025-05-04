@@ -33,32 +33,18 @@ export const useBooks = (
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [pageSize, setPageSize] = useState(initialPageSize);
-  const [sortField, setSortField] = useState<BookSortField>(initialSortField);
-  const [sortDirection, setSortDirection] = useState<SortDirection>(initialSortDirection);
-  const [filters, setFilters] = useState<BookFilters | undefined>(initialFilters);
+  const [sortField] = useState<BookSortField>(initialSortField);
+  const [sortDirection] = useState<SortDirection>(initialSortDirection);
+  const [filters] = useState<BookFilters | undefined>(initialFilters);
 
   const fetchBooks = useCallback(
     async (
-      newSortField?: BookSortField,
-      newSortDirection?: SortDirection,
-      newFilters?: BookFilters,
-      newPage?: number,
-      newPageSize?: number
+      sortFieldToUse: BookSortField = sortField,
+      sortDirectionToUse: SortDirection = sortDirection,
+      filtersToUse: BookFilters | undefined = filters,
+      pageToUse: number = currentPage,
+      pageSizeToUse: number = pageSize
     ) => {
-      // Update state with any new parameters
-      if (newSortField) setSortField(newSortField);
-      if (newSortDirection) setSortDirection(newSortDirection);
-      if (newFilters) setFilters(newFilters);
-      if (newPage !== undefined) setCurrentPage(newPage);
-      if (newPageSize !== undefined) setPageSize(newPageSize);
-
-      // Use either new values or current state values
-      const sortFieldToUse = newSortField || sortField;
-      const sortDirectionToUse = newSortDirection || sortDirection;
-      const filtersToUse = newFilters || filters;
-      const pageToUse = newPage !== undefined ? newPage : currentPage;
-      const pageSizeToUse = newPageSize !== undefined ? newPageSize : pageSize;
-
       setLoading(true);
       try {
         const { data, count, error } = await bookService.getBooks(
@@ -78,7 +64,9 @@ export const useBooks = (
           setError(null);
         }
       } catch (err) {
-        setError(err instanceof Error ? err : new Error('An unknown error occurred'));
+        setError(
+          err instanceof Error ? err : new Error("An unknown error occurred")
+        );
         setBooks([]);
       } finally {
         setLoading(false);

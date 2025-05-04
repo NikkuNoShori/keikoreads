@@ -34,8 +34,8 @@ export const AddReview = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Add Book Review</h1>
+    <div className="max-w-4xl mx-auto px-2 py-4">
+      <h1 className="text-3xl font-bold mb-4">Add Book Review</h1>
       
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Book, BookFormData, NewBook } from '../types/BookTypes';
+import { supabase } from '../utils/supabaseClient';
 
 interface BookFormProps {
   initialData?: Book;
@@ -27,6 +28,9 @@ export const BookForm = ({ initialData, onSubmit, onCancel, isSubmitting }: Book
     barnes_noble_link: '',
     read_alikes_image: ''
   });
+
+  const [uploading, setUploading] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
 
   // Populate form with initial data if provided (for editing)
   useEffect(() => {
@@ -63,305 +67,247 @@ export const BookForm = ({ initialData, onSubmit, onCancel, isSubmitting }: Book
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files && e.target.files[0];
+    if (selected && (selected.type === 'image/png' || selected.type === 'image/jpeg')) {
+      setFile(selected);
+      setFormData({ ...formData, cover_image: '' }); // Clear URL if file selected
+    } else {
+      setFile(null);
+    }
+  };
+
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    setUploading(true);
+    let coverImageUrl = formData.cover_image;
+    if (file) {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+      const { error } = await supabase.storage.from('book-covers').upload(fileName, file);
+      if (error) {
+        alert('Image upload failed: ' + error.message);
+        setUploading(false);
+        return;
+      }
+      const { publicUrl } = supabase.storage.from('book-covers').getPublicUrl(fileName).data;
+      coverImageUrl = publicUrl;
+    }
+    await onSubmit({ ...formData, cover_image: coverImageUrl });
+    setUploading(false);
+    setFile(null);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        {/* Form Title */}
-        <h2 className="text-2xl font-semibold mb-6">
-          {initialData ? 'Edit Book Review' : 'Add New Book Review'}
-        </h2>
-        
-        {/* Basic Book Information */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {/* Title */}
-          <div className="col-span-2">
-            <label htmlFor="title" className="block text-gray-700 dark:text-gray-300 mb-1 font-medium">
-              Book Title <span className="text-rose-600">*</span>
-            </label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
-              placeholder="Enter book title"
-            />
-          </div>
-          
-          {/* Author */}
-          <div>
-            <label htmlFor="author" className="block text-gray-700 dark:text-gray-300 mb-1 font-medium">
-              Author <span className="text-rose-600">*</span>
-            </label>
-            <input
-              type="text"
-              id="author"
-              name="author"
-              value={formData.author}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
-              placeholder="Enter author name"
-            />
-          </div>
-          
-          {/* Series */}
-          <div>
-            <label htmlFor="series" className="block text-gray-700 dark:text-gray-300 mb-1 font-medium">
-              Series
-            </label>
-            <input
-              type="text"
-              id="series"
-              name="series"
-              value={formData.series || ''}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
-              placeholder="Book series (if applicable)"
-            />
-          </div>
-          
-          {/* Genre */}
-          <div>
-            <label htmlFor="genre" className="block text-gray-700 dark:text-gray-300 mb-1 font-medium">
-              Genre
-            </label>
-            <input
-              type="text"
-              id="genre"
-              name="genre"
-              value={formData.genre || ''}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
-              placeholder="Book genre"
-            />
-          </div>
-          
-          {/* Publish Date */}
-          <div>
-            <label htmlFor="publish_date" className="block text-gray-700 dark:text-gray-300 mb-1 font-medium">
-              Publication Date
-            </label>
-            <input
-              type="date"
-              id="publish_date"
-              name="publish_date"
-              value={formData.publish_date || ''}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
-            />
-          </div>
-          
-          {/* Pages */}
-          <div>
-            <label htmlFor="pages" className="block text-gray-700 dark:text-gray-300 mb-1 font-medium">
-              Number of Pages
-            </label>
-            <input
-              type="number"
-              id="pages"
-              name="pages"
-              value={formData.pages || ''}
-              onChange={handleChange}
-              min="1"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
-              placeholder="Number of pages"
-            />
-          </div>
-          
-          {/* Rating */}
-          <div>
-            <label htmlFor="rating" className="block text-gray-700 dark:text-gray-300 mb-1 font-medium">
-              Rating <span className="text-rose-600">*</span>
-            </label>
-            <select
-              id="rating"
-              name="rating"
-              value={formData.rating}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
-            >
-              <option value="1">1 - Poor</option>
-              <option value="2">2 - Fair</option>
-              <option value="3">3 - Good</option>
-              <option value="4">4 - Very Good</option>
-              <option value="5">5 - Excellent</option>
-            </select>
-          </div>
-          
-          {/* Review Date */}
-          <div>
-            <label htmlFor="review_date" className="block text-gray-700 dark:text-gray-300 mb-1 font-medium">
-              Review Date
-            </label>
-            <input
-              type="date"
-              id="review_date"
-              name="review_date"
-              value={formData.review_date || ''}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
-            />
-          </div>
-          
-          {/* Cover Image URL */}
-          <div className="col-span-2">
-            <label htmlFor="cover_image" className="block text-gray-700 dark:text-gray-300 mb-1 font-medium">
-              Cover Image URL
-            </label>
-            <input
-              type="url"
-              id="cover_image"
-              name="cover_image"
-              value={formData.cover_image || ''}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
-              placeholder="URL to book cover image"
-            />
-          </div>
+    <form onSubmit={handleSubmit} className="space-y-2 p-2 text-sm bg-white dark:bg-gray-800 rounded-lg shadow-md">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 p-4">
+        {/* Title */}
+        <div>
+          <label htmlFor="title" className="block font-medium mb-0.5 text-xs text-gray-700 dark:text-maroon-text">
+            Book Title <span className="text-maroon-card">*</span>
+          </label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            required
+            className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-xs text-gray-700 dark:text-maroon-text"
+            placeholder="Enter book title"
+          />
         </div>
-        
-        {/* Description and Review */}
-        <div className="space-y-6 mb-8">
-          <div>
-            <label htmlFor="description" className="block text-gray-700 dark:text-gray-300 mb-1 font-medium">
-              Book Description
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description || ''}
-              onChange={handleChange}
-              rows={3}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
-              placeholder="Brief description or synopsis of the book"
-            ></textarea>
-          </div>
-          
-          <div>
-            <label htmlFor="review" className="block text-gray-700 dark:text-gray-300 mb-1 font-medium">
-              Your Review
-            </label>
-            <textarea
-              id="review"
-              name="review"
-              value={formData.review || ''}
-              onChange={handleChange}
-              rows={6}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
-              placeholder="Write your review here"
-            ></textarea>
-          </div>
+        {/* Author */}
+        <div>
+          <label htmlFor="author" className="block font-medium mb-0.5 text-xs text-gray-700 dark:text-maroon-text">
+            Author <span className="text-maroon-card">*</span>
+          </label>
+          <input
+            type="text"
+            id="author"
+            name="author"
+            value={formData.author}
+            onChange={handleChange}
+            required
+            className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-xs text-gray-700 dark:text-maroon-text"
+            placeholder="Enter author name"
+          />
         </div>
-        
-        {/* External Links */}
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mb-6">
-          <h3 className="text-lg font-medium mb-4 text-gray-800 dark:text-gray-200">External Links</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="goodreads_link" className="block text-gray-700 dark:text-gray-300 mb-1">
-                Goodreads
-              </label>
-              <input
-                type="url"
-                id="goodreads_link"
-                name="goodreads_link"
-                value={formData.goodreads_link || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
-                placeholder="Goodreads URL"
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="storygraph_link" className="block text-gray-700 dark:text-gray-300 mb-1">
-                StoryGraph
-              </label>
-              <input
-                type="url"
-                id="storygraph_link"
-                name="storygraph_link"
-                value={formData.storygraph_link || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
-                placeholder="StoryGraph URL"
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="bookshop_link" className="block text-gray-700 dark:text-gray-300 mb-1">
-                Bookshop.org
-              </label>
-              <input
-                type="url"
-                id="bookshop_link"
-                name="bookshop_link"
-                value={formData.bookshop_link || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
-                placeholder="Bookshop.org URL"
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="barnes_noble_link" className="block text-gray-700 dark:text-gray-300 mb-1">
-                Barnes & Noble
-              </label>
-              <input
-                type="url"
-                id="barnes_noble_link"
-                name="barnes_noble_link"
-                value={formData.barnes_noble_link || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
-                placeholder="Barnes & Noble URL"
-              />
-            </div>
-            
-            <div className="col-span-2">
-              <label htmlFor="read_alikes_image" className="block text-gray-700 dark:text-gray-300 mb-1">
-                Read-Alikes Image URL
-              </label>
-              <input
-                type="url"
-                id="read_alikes_image"
-                name="read_alikes_image"
-                value={formData.read_alikes_image || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
-                placeholder="URL to read-alikes image"
-              />
-            </div>
-          </div>
+        {/* Series */}
+        <div>
+          <label htmlFor="series" className="block font-medium mb-0.5 text-xs text-gray-700 dark:text-maroon-text">Series</label>
+          <input
+            type="text"
+            id="series"
+            name="series"
+            value={formData.series || ''}
+            onChange={handleChange}
+            className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-xs text-gray-700 dark:text-maroon-text"
+            placeholder="Book series (if applicable)"
+          />
         </div>
-        
-        {/* Form Actions */}
-        <div className="flex justify-end space-x-4">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-            disabled={isSubmitting}
+        {/* Genre */}
+        <div>
+          <label htmlFor="genre" className="block font-medium mb-0.5 text-xs text-gray-700 dark:text-maroon-text">Genre</label>
+          <input
+            type="text"
+            id="genre"
+            name="genre"
+            value={formData.genre || ''}
+            onChange={handleChange}
+            className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-xs text-gray-700 dark:text-maroon-text"
+            placeholder="Book genre"
+          />
+        </div>
+        {/* Publish Date */}
+        <div>
+          <label htmlFor="publish_date" className="block font-medium mb-0.5 text-xs text-gray-700 dark:text-maroon-text">Publish Date</label>
+          <input
+            type="date"
+            id="publish_date"
+            name="publish_date"
+            value={formData.publish_date || ''}
+            onChange={handleChange}
+            className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-xs text-gray-700 dark:text-maroon-text"
+          />
+        </div>
+        {/* Pages */}
+        <div>
+          <label htmlFor="pages" className="block font-medium mb-0.5 text-xs text-gray-700 dark:text-maroon-text">Pages</label>
+          <input
+            type="number"
+            id="pages"
+            name="pages"
+            value={formData.pages || ''}
+            onChange={handleChange}
+            min="1"
+            className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-xs text-gray-700 dark:text-maroon-text"
+            placeholder="Number of pages"
+          />
+        </div>
+        {/* Rating */}
+        <div>
+          <label htmlFor="rating" className="block font-medium mb-0.5 text-xs text-gray-700 dark:text-maroon-text">Rating <span className="text-maroon-card">*</span></label>
+          <select
+            id="rating"
+            name="rating"
+            value={formData.rating}
+            onChange={handleChange}
+            required
+            className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-xs text-gray-700 dark:text-maroon-text"
           >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-6 py-2 bg-rose-600 text-white rounded hover:bg-rose-700 disabled:opacity-50"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Saving...' : initialData ? 'Update Review' : 'Create Review'}
-          </button>
+            <option value="1">1 - Poor</option>
+            <option value="2">2 - Fair</option>
+            <option value="3">3 - Good</option>
+            <option value="4">4 - Very Good</option>
+            <option value="5">5 - Excellent</option>
+          </select>
         </div>
+        {/* Review Date */}
+        <div>
+          <label htmlFor="review_date" className="block font-medium mb-0.5 text-xs text-gray-700 dark:text-maroon-text">Review Date</label>
+          <input
+            type="date"
+            id="review_date"
+            name="review_date"
+            value={formData.review_date || ''}
+            onChange={handleChange}
+            className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-xs text-gray-700 dark:text-maroon-text"
+          />
+        </div>
+        {/* Cover Image */}
+        <div>
+          <label htmlFor="cover_image" className="block font-medium mb-0.5 text-xs text-gray-700 dark:text-maroon-text">Cover Image</label>
+          <input
+            type="file"
+            id="cover_image_file"
+            accept="image/png, image/jpeg"
+            onChange={handleFileChange}
+            className="w-full text-xs mb-1"
+          />
+          <input
+            type="url"
+            id="cover_image"
+            name="cover_image"
+            value={formData.cover_image || ''}
+            onChange={handleChange}
+            className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-xs text-gray-700 dark:text-maroon-text"
+            placeholder="URL to book cover image (optional if uploading)"
+            disabled={!!file}
+          />
+        </div>
+      </div>
+      {/* Description and Review */}
+      <div className="mt-2 space-y-2">
+        <div>
+          <label htmlFor="description" className="block font-medium mb-0.5 text-xs text-gray-700 dark:text-maroon-text">Description</label>
+          <textarea
+            id="description"
+            name="description"
+            value={formData.description || ''}
+            onChange={handleChange}
+            rows={2}
+            className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-xs text-gray-700 dark:text-maroon-text"
+            placeholder="Brief description or synopsis of the book"
+          ></textarea>
+        </div>
+        <div>
+          <label htmlFor="review" className="block font-medium mb-0.5 text-xs text-gray-700 dark:text-maroon-text">Review</label>
+          <textarea
+            id="review"
+            name="review"
+            value={formData.review || ''}
+            onChange={handleChange}
+            rows={3}
+            className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-xs text-gray-700 dark:text-maroon-text"
+            placeholder="Your thoughts on the book"
+          ></textarea>
+        </div>
+      </div>
+      {/* More Options */}
+      <details className="mt-2">
+        <summary className="cursor-pointer text-maroon-card text-xs font-semibold mb-1">More Options</summary>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+          <div>
+            <label className="block font-medium mb-0.5 text-xs text-gray-700 dark:text-maroon-text">Goodreads Link</label>
+            <input name="goodreads_link" value={formData.goodreads_link} onChange={handleChange} className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-xs text-gray-700 dark:text-maroon-text" placeholder="Goodreads URL" />
+          </div>
+          <div>
+            <label className="block font-medium mb-0.5 text-xs text-gray-700 dark:text-maroon-text">Storygraph Link</label>
+            <input name="storygraph_link" value={formData.storygraph_link} onChange={handleChange} className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-xs text-gray-700 dark:text-maroon-text" placeholder="StoryGraph URL" />
+          </div>
+          <div>
+            <label className="block font-medium mb-0.5 text-xs text-gray-700 dark:text-maroon-text">Bookshop Link</label>
+            <input name="bookshop_link" value={formData.bookshop_link} onChange={handleChange} className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-xs text-gray-700 dark:text-maroon-text" placeholder="Bookshop.org URL" />
+          </div>
+          <div>
+            <label className="block font-medium mb-0.5 text-xs text-gray-700 dark:text-maroon-text">Barnes & Noble Link</label>
+            <input name="barnes_noble_link" value={formData.barnes_noble_link} onChange={handleChange} className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-xs text-gray-700 dark:text-maroon-text" placeholder="Barnes & Noble URL" />
+          </div>
+          <div>
+            <label className="block font-medium mb-0.5 text-xs text-gray-700 dark:text-maroon-text">Read Alikes Image URL</label>
+            <input name="read_alikes_image" value={formData.read_alikes_image} onChange={handleChange} className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-xs text-gray-700 dark:text-maroon-text" placeholder="URL to read-alikes image" />
+          </div>
+        </div>
+      </details>
+      {/* Action Buttons */}
+      <div className="flex justify-end gap-4 mt-4">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-4 py-2 rounded bg-gray-300 text-gray-800 hover:bg-gray-400 dark:bg-gray-700 dark:text-maroon-text dark:hover:bg-maroon-card font-semibold text-xs"
+          disabled={isSubmitting || uploading}
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="px-4 py-2 rounded bg-rose-600 text-white hover:bg-rose-700 font-semibold text-xs dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent"
+          disabled={isSubmitting || uploading}
+        >
+          {uploading ? 'Uploading...' : isSubmitting ? 'Saving...' : 'Save Review'}
+        </button>
       </div>
     </form>
   );
