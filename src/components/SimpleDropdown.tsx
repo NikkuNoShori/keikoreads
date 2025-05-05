@@ -98,7 +98,7 @@ export const SimpleDropdown: React.FC<SimpleDropdownProps> = ({
         <div 
           className={`!absolute ${menuPosition === 'right' ? 'right-0' : 'left-0'} bg-white dark:bg-gray-800 rounded-lg shadow-xl py-1 border-4 border-green-500`}
           style={{ 
-            zIndex: 9999,
+            zIndex: 10000,
             minWidth: '250px',
             width: "max-content",
             boxShadow: '0 10px 25px rgba(0,0,0,0.3)', 
