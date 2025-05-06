@@ -4,7 +4,29 @@ import { About } from './pages/About';
 import { Reviews } from './pages/Reviews';
 import { Contact } from './pages/Contact';
 import { BookDetail } from './pages/BookDetail';
+import { Login } from './pages/Login';
+import { Signup } from './pages/Signup';
+import { AuthCallback } from './pages/AuthCallback';
+import { Settings } from './pages/Settings';
 import { SmartLink } from './components/SmartLink';
+import { ProtectedRoute } from './components/ProtectedRoute';
+
+// Create a verification notice page
+const VerifyEmail = () => (
+  <div className="max-w-md mx-auto my-12 p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800">
+    <h1 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Verify Your Email</h1>
+    <div className="p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded dark:bg-blue-900 dark:text-blue-200 mb-6">
+      <p>Please check your email for a verification link. You need to verify your email before accessing this page.</p>
+    </div>
+    <p className="text-gray-600 dark:text-gray-400 mb-4">
+      If you don't see the email, check your spam folder or request a new verification email.
+    </p>
+    <div className="flex justify-between">
+      <SmartLink to="/" className="text-rose-600 hover:underline">Go back home</SmartLink>
+      <button className="text-rose-600 hover:underline">Resend verification</button>
+    </div>
+  </div>
+);
 
 const NotFound = () => (
   <div className="w-full text-center py-20">
@@ -16,11 +38,46 @@ const NotFound = () => (
 
 export const AppRoutes = () => (
   <Routes>
+    {/* Public Routes */}
     <Route path="/" element={<Home />} />
     <Route path="/about" element={<About />} />
-    <Route path="/reviews" element={<Reviews />} />
-    <Route path="/reviews/:id" element={<BookDetail />} />
     <Route path="/contact" element={<Contact />} />
+    
+    {/* Authentication Routes */}
+    <Route path="/login" element={<Login />} />
+    <Route path="/signup" element={<Signup />} />
+    <Route path="/auth/callback" element={<AuthCallback />} />
+    <Route path="/verify-email" element={<VerifyEmail />} />
+    
+    {/* Protected Routes */}
+    <Route 
+      path="/settings" 
+      element={
+        <ProtectedRoute requireAuth={true}>
+          <Settings />
+        </ProtectedRoute>
+      } 
+    />
+    
+    {/* Both public access and secure operations */}
+    <Route 
+      path="/reviews" 
+      element={
+        <ProtectedRoute requireAuth={false}>
+          <Reviews />
+        </ProtectedRoute>
+      } 
+    />
+    <Route 
+      path="/reviews/:id" 
+      element={
+        <ProtectedRoute requireAuth={false}>
+          <BookDetail />
+        </ProtectedRoute>
+      } 
+    />
+    
+    {/* Catch all - 404 */}
     <Route path="*" element={<NotFound />} />
   </Routes>
 ); 
