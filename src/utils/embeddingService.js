@@ -8,7 +8,11 @@ import { supabase } from './supabaseClient';
  */
 export const generateEmbedding = async (text) => {
   try {
-    const OPENAI_API_KEY = 'YOUR_OPENAI_API_KEY'; // Replace with your API key
+    // Get the OpenAI API key from environment variable
+    const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+    if (!OPENAI_API_KEY) {
+      throw new Error('OpenAI API key is missing. Please set VITE_OPENAI_API_KEY in your .env file.');
+    }
     
     const response = await fetch('https://api.openai.com/v1/embeddings', {
       method: 'POST',
