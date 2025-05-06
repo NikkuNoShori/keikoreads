@@ -1,20 +1,23 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { createClient } from '@supabase/supabase-js';
-import { Book } from '../types/BookTypes';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Book, NewBook } from '../types/BookTypes';
 import { SmartLink } from '../components/SmartLink';
 import { BookCover } from '../components/BookCover';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import { supabase } from '../utils/supabaseClient';
+import { AuthorizedAction } from '../components/AuthorizedAction';
+import { BookForm } from '../components/BookForm';
+import { updateBook, deleteBook } from '../utils/bookService';
 
 export const BookDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -36,11 +39,74 @@ export const BookDetail = () => {
     if (id) fetchBook();
   }, [id]);
 
+  const handleEditBook = () => {
+    setShowModal(true);
+  };
+
+  const handleDeleteBook = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleBookSubmit = async (bookData: NewBook) => {
+    if (!book || !id) return;
+    
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await updateBook(id, bookData);
+      if (!error && data) {
+        // Refresh data
+        setBook(data as Book);
+        setShowModal(false);
+      } else {
+        alert(error?.message || 'Error updating review');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!id) return;
+    
+    const { error } = await deleteBook(id);
+    if (!error) {
+      // Redirect to reviews page
+      navigate('/reviews');
+    } else {
+      alert(`Error deleting review: ${error.message}`);
+    }
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setShowDeleteConfirm(false);
+  };
+
   if (loading) return <div className="text-center py-10">Loading...</div>;
   if (error || !book) return <div className="text-center py-10 text-red-600">{error || 'Book not found.'}</div>;
 
   return (
     <div className="max-w-4xl mx-auto bg-white dark:bg-maroon-container shadow-lg rounded-lg overflow-hidden mt-4">
+      {/* Action Buttons for Authenticated Users */}
+      <div className="flex justify-end p-4">
+        <AuthorizedAction>
+          <div className="flex space-x-3">
+            <button
+              onClick={handleEditBook}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              Edit Review
+            </button>
+            <button
+              onClick={handleDeleteBook}
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+            >
+              Delete Review
+            </button>
+          </div>
+        </AuthorizedAction>
+      </div>
+
       <div className="flex flex-col md:flex-row gap-4 p-4">
         {/* Book Info Sidebar */}
         <aside className="book-info flex-shrink-0 w-full md:w-64 flex flex-col items-center md:items-start">
@@ -162,6 +228,51 @@ export const BookDetail = () => {
           </div>
         </main>
       </div>
+
+      {/* Edit Modal */}
+      {showModal && book && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 shadow-2xl rounded-2xl max-w-md w-full p-1 relative max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-white dark:scrollbar-thumb-maroon-card dark:scrollbar-track-gray-900">
+            <h2 className="text-2xl font-semibold font-serif italic text-center bg-transparent dark:bg-gray-800 py-2 rounded-t-2xl">
+              Edit Book Review
+            </h2>
+            <div className="h-1 w-24 bg-maroon-card rounded-full mx-auto mb-0"></div>
+            <BookForm 
+              initialData={book}
+              onSubmit={handleBookSubmit} 
+              onCancel={closeModal} 
+              isSubmitting={isSubmitting} 
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg max-w-md w-full p-6 relative">
+            <h3 className="text-lg font-semibold mb-2">Confirm Delete</h3>
+            <p className="mb-4">
+              Are you sure you want to delete the review for <span className="font-semibold">{book.title}</span>? 
+              This action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={closeModal}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }; 
