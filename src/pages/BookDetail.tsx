@@ -86,7 +86,7 @@ export const BookDetail = () => {
   if (error || !book) return <div className="text-center py-10 text-red-600">{error || 'Book not found.'}</div>;
 
   return (
-    <div className="max-w-4xl mx-auto bg-white dark:bg-maroon-container shadow-lg rounded-lg overflow-hidden mt-4">
+    <>
       {/* Action Buttons for Authenticated Users */}
       <div className="flex justify-end p-4">
         <AuthorizedAction>
@@ -273,6 +273,6 @@ export const BookDetail = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }; 

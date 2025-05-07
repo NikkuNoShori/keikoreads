@@ -56,30 +56,22 @@ export const SimpleDropdown: React.FC<SimpleDropdownProps> = ({
   const toggleDropdown = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsOpen(prev => !prev);
-    console.log('SimpleDropdown toggled, new state:', !isOpen);
   };
 
-  // Calculate dropdown position when opened
+  // Calculate dropdown position when opened (for portal)
   useEffect(() => {
-    if (isOpen && dropdownRef.current) {
-      const dropdown = dropdownRef.current.querySelector('[role="menu"]') as HTMLElement;
-      if (dropdown) {
-        // Ensure the dropdown is visible within the viewport
-        const rect = dropdownRef.current.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const spaceBelow = viewportHeight - rect.bottom;
-        
-        // If not enough space below, position above
-        if (spaceBelow < 200 && rect.top > 200) {
-          dropdown.style.bottom = "calc(100% + 5px)";
-          dropdown.style.top = "auto";
-        } else {
-          dropdown.style.top = "calc(100% + 5px)";
-          dropdown.style.bottom = "auto";
-        }
-      }
-    }
-  }, [isOpen]);
+    if (!isOpen || !dropdownRef.current) return;
+    const updatePosition = () => {
+      // No-op: positioning handled by CSS classes now
+    };
+    updatePosition();
+    window.addEventListener('scroll', updatePosition, true);
+    window.addEventListener('resize', updatePosition);
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
+    };
+  }, [isOpen, menuPosition]);
 
   return (
     <div className={`relative inline-block ${className}`} ref={dropdownRef}>
@@ -92,24 +84,19 @@ export const SimpleDropdown: React.FC<SimpleDropdownProps> = ({
       >
         {buttonContent}
       </div>
-      
-      {/* Dropdown menu - absolute position with high z-index */}
+      {/* Dropdown menu - in-card absolute positioning */}
       {isOpen && (
-        <div 
-          className={`!absolute ${menuPosition === 'right' ? 'right-0' : 'left-0'} bg-white dark:bg-gray-800 rounded-lg shadow-xl py-1 border-4 border-green-500`}
-          style={{ 
-            zIndex: 10000,
-            minWidth: '250px',
-            width: "max-content",
-            boxShadow: '0 10px 25px rgba(0,0,0,0.3)', 
-            top: "calc(100% + 5px)",
-            maxHeight: 'calc(100vh - 100px)', 
-            overflowY: 'auto',
-            position: 'absolute',
-            display: 'block',
-            visibility: 'visible',
-            opacity: 1
-          }}
+        <div
+          className={[
+            'absolute right-0 top-full mt-2 z-[10000] min-w-[140px] max-w-[200px] w-max',
+            'bg-white/95 dark:bg-gray-800/95',
+            'border border-white dark:border-white',
+            'shadow-xl',
+            'max-h-[calc(100vh-100px)] overflow-y-auto',
+            'text-gray-700 dark:text-maroon-text',
+            'rounded-lg',
+            'transition-all',
+          ].join(' ')}
           aria-orientation="vertical"
           role="menu"
         >
