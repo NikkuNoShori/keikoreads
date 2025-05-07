@@ -216,41 +216,23 @@ export const useAuth = () => {
     }
   };
 
-  const signInWithOAuth = async (
-    provider: Provider,
-    isSignUp: boolean = false
-  ) => {
-    try {
-      // For OAuth we need to check if this is a sign up or sign in attempt
-      // If the caller specifies it's a sign up, we need to store the intent
-      // to verify after getting the user's info in the callback
-      if (isSignUp) {
-        localStorage.setItem("oauthIntent", "signup");
-      } else {
-        localStorage.setItem("oauthIntent", "signin");
-      }
-
-      // Store the returnUrl in localStorage so we can access it after the OAuth redirect
-      const returnUrl = window.location.pathname;
-      if (returnUrl !== "/login" && returnUrl !== "/signup") {
-        localStorage.setItem("authReturnUrl", returnUrl);
-      }
-
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      return { data, error: null };
-    } catch (error) {
-      return { data: null, error };
+  const signInWithOAuth = async (provider: Provider) => {
+    // Always force Google account picker
+    const options: {
+      redirectTo: string;
+      queryParams: Record<string, string>;
+    } = {
+      redirectTo: window.location.origin + "/auth/callback",
+      queryParams: {},
+    };
+    if (provider === "google") {
+      options.queryParams.prompt = "select_account";
     }
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options,
+    });
+    return { data, error };
   };
 
   const signUp = async (email: string, password: string) => {
@@ -319,13 +301,13 @@ export const useAuth = () => {
 
     if (oauthIntent === "signup" && userExists) {
       // User tried to sign up but already exists
-      // We can't stop the auth flow at this point, but we can show an error message
+      // Show a welcome back message instead of an error
       localStorage.setItem(
-        "authError",
-        "An account with this email already exists. Please sign in instead."
+        "welcomeBack",
+        "Welcome back! You've signed in with your existing account."
       );
       // They've actually been signed in by Supabase already, so redirect to home or profile
-      // after showing the error message on the next page
+      // after showing the welcome message on the next page
     } else if (oauthIntent === "signin" && !userExists) {
       // User tried to sign in but doesn't exist
       // We need to create their profile since they authenticated successfully

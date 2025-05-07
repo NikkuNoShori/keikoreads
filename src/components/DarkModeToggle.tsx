@@ -12,7 +12,7 @@ export const DarkModeToggle = ({ isDarkMode, onToggle }: DarkModeToggleProps) =>
         'flex items-center justify-between gap-2 w-full text-left px-4 py-2 text-sm',
         'text-gray-700 dark:text-gray-300',
         'hover:bg-gray-100 dark:hover:bg-gray-700',
-        'rounded-lg group transition-colors',
+        'group transition-colors',
         'appearance-none border-0 bg-transparent',
         'focus:outline-none focus:ring-0',
       ].join(' ')}
