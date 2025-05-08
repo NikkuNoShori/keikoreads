@@ -2,10 +2,9 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Book, NewBook } from '../types/BookTypes';
 import { getBookBySlug, deleteBook, updateBook } from '../utils/bookService';
-import { formatDate, formatExternalLink, slugify } from '../utils/formatters';
+import { formatDate, formatExternalLink } from '../utils/formatters';
 import { SmartLink } from '../components/SmartLink';
 import { BookForm } from '../components/BookForm';
-import { BookCover } from '../components/BookCover';
 import { AuthorizedAction } from '../components/AuthorizedAction';
 
 export const ReviewDetail = () => {
@@ -80,22 +79,6 @@ export const ReviewDetail = () => {
     }
   };
 
-  // Generate star rating display
-  const renderStars = (rating: number) => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <span 
-          key={i} 
-          className={`${i <= rating ? 'text-yellow-500' : 'text-gray-300'} text-2xl`}
-        >
-          ★
-        </span>
-      );
-    }
-    return stars;
-  };
-
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-12 text-center">
@@ -131,8 +114,8 @@ export const ReviewDetail = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-2 py-6">
-      <div className="flex flex-col md:flex-row gap-8">
+    <>
+      <div className="flex flex-col md:flex-row gap-8 max-w-5xl mx-auto py-1">
         {/* Left Column: Cover, Details, Rating */}
         <div className="flex flex-col items-center md:items-start w-full md:w-1/3 gap-6">
           <div className="w-[200px] h-[280px] bg-gray-100 dark:bg-gray-700 rounded shadow overflow-hidden flex items-center justify-center mx-auto">
@@ -143,7 +126,7 @@ export const ReviewDetail = () => {
             />
           </div>
           <div className="w-full mt-2">
-            <div className="font-serif italic text-lg font-bold mb-2 pl-4 border-l-4 border-gray-400 dark:border-gray-600">Book Details</div>
+            <div className="font-serif italic text-lg font-bold mb-2 pl-4 border-l-4 border-rose-200 dark:border-maroon-accent">Book Details</div>
             <div className="pl-8">
               <div className="mb-1"><span className="font-semibold">Author:</span> {book.author}</div>
               {book.series && (
@@ -163,7 +146,7 @@ export const ReviewDetail = () => {
             </div>
           </div>
           <div className="w-full mt-4">
-            <div className="font-serif italic text-lg font-bold mb-1 pl-4 border-l-4 border-gray-400 dark:border-gray-600">Rating:</div>
+            <div className="font-serif italic text-lg font-bold mb-1 pl-4 border-l-4 border-rose-200 dark:border-maroon-accent">Rating:</div>
             <div className="flex items-center pl-8">
               {Array.from({ length: 5 }).map((_, i) => (
                 <span key={i} className={
@@ -180,16 +163,17 @@ export const ReviewDetail = () => {
         <div className="flex-1 flex flex-col gap-6 mt-10 md:mt-0">
           {/* Edit/Delete Buttons Above Divider */}
           <AuthorizedAction>
-            <div className="flex justify-end gap-2 mb-2">
+            <div className="flex justify-end space-x-2 mb-4 w-full">
               <button
                 onClick={handleEdit}
-                className="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700 transition-colors dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent"
+                className="px-4 py-2 rounded transition-colors bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 text-base"
+                disabled={isDeleting}
               >
-                Edit Review
+                Edit
               </button>
               <button
                 onClick={() => setShowConfirmDelete(true)}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors dark:bg-red-700 dark:hover:bg-red-800"
+                className="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700 transition-colors dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent text-base"
                 disabled={isDeleting}
               >
                 {isDeleting ? 'Deleting...' : 'Delete Review'}
@@ -265,7 +249,6 @@ export const ReviewDetail = () => {
           </div>
         </div>
       </div>
-      
       {/* Read-Alikes Image */}
       {book.read_alikes_image && (
         <div className="mb-6">
@@ -282,7 +265,6 @@ export const ReviewDetail = () => {
           </div>
         </div>
       )}
-      
       {/* Edit Modal */}
       {showEditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-hidden">
@@ -292,7 +274,7 @@ export const ReviewDetail = () => {
             </h2>
             <div className="h-1 w-24 bg-maroon-card rounded-full mx-auto mb-0"></div>
             <BookForm 
-              initialData={book} 
+              initialData={book || undefined} 
               onSubmit={handleUpdateBook} 
               onCancel={() => setShowEditModal(false)} 
               isSubmitting={isSubmitting} 
@@ -300,7 +282,6 @@ export const ReviewDetail = () => {
           </div>
         </div>
       )}
-      
       {/* Delete Confirmation Modal */}
       {showConfirmDelete && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -328,6 +309,6 @@ export const ReviewDetail = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }; 
