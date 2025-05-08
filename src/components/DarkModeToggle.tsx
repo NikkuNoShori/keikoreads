@@ -8,21 +8,11 @@ export const DarkModeToggle = ({ isDarkMode, onToggle }: DarkModeToggleProps) =>
     <button
       onClick={onToggle}
       type="button"
-      className={[
-        'flex items-center justify-between gap-2 w-full text-left px-4 py-2 text-sm',
-        'text-gray-700 dark:text-gray-300',
-        'hover:bg-gray-100 dark:hover:bg-gray-700',
-        'group transition-colors',
-        'appearance-none border-0 bg-transparent',
-        'focus:outline-none focus:ring-0',
-      ].join(' ')}
+      className="flex items-center justify-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 group transition-colors appearance-none border-0 bg-transparent focus:outline-none focus:ring-0 rounded"
       aria-label="Toggle dark mode"
     >
       <span>{isDarkMode ? 'Dark' : 'Light'}</span>
-      <svg className={[
-        'w-5 h-5',
-        'text-gray-400 group-hover:text-rose-600 dark:group-hover:text-rose-300 transition-colors',
-      ].join(' ')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-5 h-5 text-gray-400 group-hover:text-rose-600 dark:group-hover:text-rose-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
           className={isDarkMode ? 'hidden' : ''}
           strokeLinecap="round"
