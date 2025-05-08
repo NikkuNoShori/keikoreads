@@ -2,7 +2,6 @@
 import { Book } from '../types/BookTypes';
 import { formatDate, slugify } from '../utils/formatters';
 import { SmartLink } from './SmartLink';
-import { BookCover } from './BookCover';
 import { BookMenu } from './BookMenu';
 import { AuthorizedAction } from './AuthorizedAction';
 
@@ -11,17 +10,13 @@ interface BookCardProps {
   onEdit?: (book: Book) => void;
   onDelete?: (book: Book) => void;
   selectMode?: boolean;
-  isSelected?: boolean;
-  onToggleSelect?: (bookId: string) => void;
 }
 
 export const BookCard = ({ 
   book, 
   onEdit, 
   onDelete, 
-  selectMode = false,
-  isSelected = false,
-  onToggleSelect
+  selectMode = false
 }: BookCardProps) => {
   // Generate star rating
   const renderStars = (rating: number) => {
@@ -57,12 +52,6 @@ export const BookCard = ({
       ? book.series.replace(new RegExp(`book\\s+${bookNumber.replace('Book ', '')}|#${bookNumber.replace('Book ', '')}`, 'i'), '').trim() 
       : book.series
     : null;
-
-  const handleCardClick = () => {
-    if (selectMode && onToggleSelect) {
-      onToggleSelect(book.id);
-    }
-  };
 
   return (
     <div className="book-card w-[240px] flex flex-col items-center bg-white dark:bg-maroon-container shadow-md rounded overflow-hidden transition-all duration-300 hover:shadow-lg group">

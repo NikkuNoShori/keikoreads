@@ -51,17 +51,6 @@ export const Reviews = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
-  // Toggle review selection
-  const toggleBookSelection = (bookId: string) => {
-    const newSelectedBooks = new Set(selectedBooks);
-    if (newSelectedBooks.has(bookId)) {
-      newSelectedBooks.delete(bookId);
-    } else {
-      newSelectedBooks.add(bookId);
-    }
-    setSelectedBooks(newSelectedBooks);
-  };
-  
   // Toggle select mode
   const toggleSelectMode = () => {
     setSelectMode(!selectMode);
@@ -397,8 +386,6 @@ export const Reviews = () => {
                 onEdit={() => handleEditBook(book)}
                 onDelete={() => handleDeleteBook(book)}
                 selectMode={selectMode}
-                isSelected={selectedBooks.has(book.id)}
-                onToggleSelect={toggleBookSelection}
               />
             ))}
           </div>

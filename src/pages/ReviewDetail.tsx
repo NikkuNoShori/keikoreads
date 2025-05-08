@@ -128,6 +128,7 @@ export const ReviewDetail = () => {
           <div className="w-full mt-2">
             <div className="font-serif italic text-lg font-bold mb-2 pl-4 border-l-4 border-rose-200 dark:border-maroon-accent">Book Details</div>
             <div className="pl-8">
+              <div className="mb-1"><span className="font-semibold">Title:</span> {book.title}</div>
               <div className="mb-1"><span className="font-semibold">Author:</span> {book.author}</div>
               {book.series && (
                 <div className="mb-1 flex items-center">
