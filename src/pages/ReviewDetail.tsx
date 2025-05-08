@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Book, NewBook } from '../types/BookTypes';
-import { getBookById, deleteBook, updateBook } from '../utils/bookService';
-import { formatDate, formatExternalLink } from '../utils/formatters';
+import { getBookBySlug, deleteBook, updateBook } from '../utils/bookService';
+import { formatDate, formatExternalLink, slugify } from '../utils/formatters';
 import { SmartLink } from '../components/SmartLink';
 import { BookForm } from '../components/BookForm';
 import { BookCover } from '../components/BookCover';
+import { AuthorizedAction } from '../components/AuthorizedAction';
 
 export const ReviewDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
@@ -21,17 +22,13 @@ export const ReviewDetail = () => {
 
   useEffect(() => {
     const fetchBook = async () => {
-      if (!id) return;
-
+      if (!slug) return;
       setLoading(true);
       try {
-        const { data, error } = await getBookById(id);
-        
-        if (error) {
-          throw error;
-        }
-        
+        const { data, error } = await getBookBySlug(slug);
+        if (error) throw error;
         setBook(data);
+        document.title = `Keiko Reads | ${data.title}`;
       } catch (err) {
         console.error('Error fetching book:', err);
         setError(err instanceof Error ? err.message : 'An unknown error occurred');
@@ -39,22 +36,18 @@ export const ReviewDetail = () => {
         setLoading(false);
       }
     };
-
     fetchBook();
-  }, [id]);
+  }, [slug]);
 
   const handleDelete = async () => {
-    if (!id) return;
-    
+    if (!slug) return;
     setIsDeleting(true);
     try {
-      const { error } = await deleteBook(id);
-      
-      if (error) {
-        throw error;
-      }
-      
-      // Redirect to reviews page after successful deletion
+      // Find the book by slug to get its id
+      const { data, error } = await getBookBySlug(slug);
+      if (error || !data) throw error || new Error('Book not found');
+      const { error: delError } = await deleteBook(data.id);
+      if (delError) throw delError;
       navigate('/reviews');
     } catch (err) {
       console.error('Error deleting book:', err);
@@ -69,18 +62,15 @@ export const ReviewDetail = () => {
   };
 
   const handleUpdateBook = async (bookData: NewBook) => {
-    if (!id || !book) return;
-    
+    if (!slug || !book) return;
     setIsSubmitting(true);
     try {
-      const { data, error } = await updateBook(id, bookData);
-      
-      if (error) {
-        throw error;
-      }
-      
-      // Update the book state with the edited data
-      setBook(data);
+      // Find the book by slug to get its id
+      const { data, error } = await getBookBySlug(slug);
+      if (error || !data) throw error || new Error('Book not found');
+      const { data: updated, error: updError } = await updateBook(data.id, bookData);
+      if (updError) throw updError;
+      setBook(updated);
       setShowEditModal(false);
     } catch (err) {
       console.error('Error updating book:', err);
@@ -141,160 +131,139 @@ export const ReviewDetail = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-1.5 py-2.5">
-      {/* Book Header */}
-      <div className="flex flex-col md:flex-row gap-6 mb-6">
-        {/* Cover Image */}
-        <div className="w-full md:w-1/4">
-          <div className="max-w-[220px] mx-auto md:mx-0">
-            <BookCover 
-              coverImage={book.cover_image || ''} 
-              title={book.title}
-              className="w-full shadow-md"
+    <div className="max-w-5xl mx-auto px-2 py-6">
+      <div className="flex flex-col md:flex-row gap-8">
+        {/* Left Column: Cover, Details, Rating */}
+        <div className="flex flex-col items-center md:items-start w-full md:w-1/3 gap-6">
+          <div className="w-[200px] h-[280px] bg-gray-100 dark:bg-gray-700 rounded shadow overflow-hidden flex items-center justify-center mx-auto">
+            <img
+              src={book.cover_image || ''}
+              alt={`Cover for ${book.title}`}
+              className="w-full h-full object-cover"
             />
           </div>
-        </div>
-        
-        {/* Book Info */}
-        <div className="w-full md:w-3/4">
-          <h1 className="text-2xl font-bold mb-1">{book.title}</h1>
-          <p className="text-lg text-gray-700 dark:text-gray-300 mb-2">
-            by {book.author}
-            {book.series && <span className="italic"> ({book.series})</span>}
-          </p>
-          
-          {/* Rating */}
-          <div className="flex items-center mb-3">
-            {renderStars(book.rating)}
-            <span className="ml-2 text-gray-600 dark:text-gray-400">
-              {book.rating}/5
-            </span>
-          </div>
-          
-          {/* Metadata Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-3 gap-y-1 mb-4">
-            {book.genre && (
-              <div>
-                <span className="text-gray-600 dark:text-gray-400">Genre:</span>{' '}
-                <span className="font-medium">{book.genre}</span>
-              </div>
-            )}
-            
-            {book.publish_date && (
-              <div>
-                <span className="text-gray-600 dark:text-gray-400">Published:</span>{' '}
-                <span className="font-medium">{formatDate(book.publish_date)}</span>
-              </div>
-            )}
-            
-            {book.pages && (
-              <div>
-                <span className="text-gray-600 dark:text-gray-400">Pages:</span>{' '}
-                <span className="font-medium">{book.pages}</span>
-              </div>
-            )}
-            
-            {book.review_date && (
-              <div>
-                <span className="text-gray-600 dark:text-gray-400">Reviewed:</span>{' '}
-                <span className="font-medium">{formatDate(book.review_date)}</span>
-              </div>
-            )}
-          </div>
-          
-          {/* External Links */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            {book.goodreads_link && (
-              <SmartLink to={formatExternalLink(book.goodreads_link)} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Goodreads</SmartLink>
-            )}
-            
-            {book.storygraph_link && (
-              <SmartLink to={formatExternalLink(book.storygraph_link)} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">StoryGraph</SmartLink>
-            )}
-            
-            {book.bookshop_link && (
-              <SmartLink to={formatExternalLink(book.bookshop_link)} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Bookshop.org</SmartLink>
-            )}
-            
-            {book.barnes_noble_link && (
-              <SmartLink to={formatExternalLink(book.barnes_noble_link)} className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-full text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">Barnes & Noble</SmartLink>
-            )}
-          </div>
-          
-          {/* Action Buttons */}
-          <div className="flex gap-3">
-            <button
-              onClick={handleEdit}
-              className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors text-sm"
-            >
-              Edit Review
-            </button>
-            
-            <button
-              onClick={() => setShowConfirmDelete(true)}
-              className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded transition-colors text-sm"
-              disabled={isDeleting}
-            >
-              {isDeleting ? 'Deleting...' : 'Delete Review'}
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      {/* Description and Review */}
-      <div className="space-y-4 mb-6">
-        {book.description && (
-          <div>
-            {/* Description divider similar to the Review divider */}
-            <div className="relative flex items-center py-4">
-              <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
-              <span className="flex-shrink mx-3 text-gray-600 dark:text-gray-400 font-serif font-medium tracking-wide text-sm">Description</span>
-              <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
-            </div>
-            <div className="prose prose-xs text-sm dark:prose-invert max-w-none font-serif leading-relaxed">
-              {book.description.length > 150 && !showFullDescription ? (
-                <>
-                  <p className="line-clamp-5">{book.description}</p>
-                  <button 
-                    onClick={() => setShowFullDescription(true)}
-                    className="text-blue-600 hover:underline text-xs font-medium mt-1 font-sans"
+          <div className="w-full mt-2">
+            <div className="font-serif italic text-lg font-bold mb-2 pl-4 border-l-4 border-gray-400 dark:border-gray-600">Book Details</div>
+            <div className="pl-8">
+              <div className="mb-1"><span className="font-semibold">Author:</span> {book.author}</div>
+              {book.series && (
+                <div className="mb-1 flex items-center">
+                  <span className="font-semibold">Series:</span>
+                  <span
+                    className="ml-1 truncate max-w-[220px] inline-block align-middle"
+                    title={book.series}
                   >
-                    View more
-                  </button>
-                </>
-              ) : (
-                <>
-                  <p>{book.description}</p>
-                  {book.description.length > 150 && (
+                    {book.series}
+                  </span>
+                </div>
+              )}
+              {book.genre && <div className="mb-1"><span className="font-semibold">Genre:</span> {book.genre}</div>}
+              {book.publish_date && <div className="mb-1"><span className="font-semibold">Published:</span> {formatDate(book.publish_date)}</div>}
+              {book.pages && <div className="mb-1"><span className="font-semibold">Pages:</span> {book.pages}</div>}
+            </div>
+          </div>
+          <div className="w-full mt-4">
+            <div className="font-serif italic text-lg font-bold mb-1 pl-4 border-l-4 border-gray-400 dark:border-gray-600">Rating:</div>
+            <div className="flex items-center pl-8">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <span key={i} className={
+                  i < book.rating
+                    ? 'text-black dark:text-white text-xl'
+                    : 'text-gray-300 dark:text-gray-500 text-xl'
+                }>★</span>
+              ))}
+              <span className="ml-2 text-base">({book.rating}/5)</span>
+            </div>
+          </div>
+        </div>
+        {/* Right Column: Description, Review, Links, Date, Thanks */}
+        <div className="flex-1 flex flex-col gap-6 mt-10 md:mt-0">
+          {/* Edit/Delete Buttons Above Divider */}
+          <AuthorizedAction>
+            <div className="flex justify-end gap-2 mb-2">
+              <button
+                onClick={handleEdit}
+                className="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700 transition-colors dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent"
+              >
+                Edit Review
+              </button>
+              <button
+                onClick={() => setShowConfirmDelete(true)}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors dark:bg-red-700 dark:hover:bg-red-800"
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Review'}
+              </button>
+            </div>
+          </AuthorizedAction>
+          {/* Description Divider */}
+          <div className="relative flex items-center py-2">
+            <div className="flex-grow border-t border-gray-400 dark:border-gray-600"></div>
+            <span className="flex-shrink mx-3 font-serif italic text-lg text-gray-700 dark:text-gray-200">Description</span>
+            <div className="flex-grow border-t border-gray-400 dark:border-gray-600"></div>
+          </div>
+          <div className="prose prose-sm dark:prose-invert max-w-none font-serif leading-relaxed">
+            {book.description && (
+              <>
+                {book.description.length > 150 && !showFullDescription ? (
+                  <>
+                    <p className="line-clamp-5">{book.description}</p>
                     <button 
-                      onClick={() => setShowFullDescription(false)}
+                      onClick={() => setShowFullDescription(true)}
                       className="text-blue-600 hover:underline text-xs font-medium mt-1 font-sans"
                     >
-                      View less
+                      View more
                     </button>
-                  )}
-                </>
-              )}
-            </div>
+                  </>
+                ) : (
+                  <>
+                    <p>{book.description}</p>
+                    {book.description.length > 150 && (
+                      <button 
+                        onClick={() => setShowFullDescription(false)}
+                        className="text-blue-600 hover:underline text-xs font-medium mt-1 font-sans"
+                      >
+                        View less
+                      </button>
+                    )}
+                  </>
+                )}
+              </>
+            )}
           </div>
-        )}
-        
-        {/* Divider with Review in the middle */}
-        {book.review && (
-          <div className="relative flex items-center py-4">
-            <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
-            <span className="flex-shrink mx-3 text-gray-600 dark:text-gray-400 font-medium text-sm">Review</span>
-            <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+          {/* Review Divider */}
+          <div className="relative flex items-center py-2">
+            <div className="flex-grow border-t border-gray-400 dark:border-gray-600"></div>
+            <span className="flex-shrink mx-3 font-serif italic text-lg text-gray-700 dark:text-gray-200">Review</span>
+            <div className="flex-grow border-t border-gray-400 dark:border-gray-600"></div>
           </div>
-        )}
-        
-        {book.review && (
-          <div>
-            <div className="prose prose-sm dark:prose-invert max-w-none font-serif italic">
-              <p>{book.review}</p>
-            </div>
+          <div className="prose prose-sm dark:prose-invert max-w-none font-serif italic">
+            <p>{book.review}</p>
           </div>
-        )}
+          {book.review_date && (
+            <div className="text-center text-xs text-gray-500 dark:text-maroon-secondary mt-2">Date posted: {formatDate(book.review_date)}</div>
+          )}
+          <div className="flex flex-wrap gap-2 mt-2">
+            {book.goodreads_link && (
+              <SmartLink to={formatExternalLink(book.goodreads_link)} className="px-3 py-1 bg-rose-700 text-white hover:bg-rose-800 dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent rounded-none text-sm font-medium transition-colors">Goodreads</SmartLink>
+            )}
+            {book.storygraph_link && (
+              <SmartLink to={formatExternalLink(book.storygraph_link)} className="px-3 py-1 bg-rose-700 text-white hover:bg-rose-800 dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent rounded-none text-sm font-medium transition-colors">Storygraph</SmartLink>
+            )}
+            {book.bookshop_link && (
+              <SmartLink to={formatExternalLink(book.bookshop_link)} className="px-3 py-1 bg-rose-700 text-white hover:bg-rose-800 dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent rounded-none text-sm font-medium transition-colors">Bookshop.org</SmartLink>
+            )}
+            {book.barnes_noble_link && (
+              <SmartLink to={formatExternalLink(book.barnes_noble_link)} className="px-3 py-1 bg-rose-700 text-white hover:bg-rose-800 dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent rounded-none text-sm font-medium transition-colors">Barnes & Noble</SmartLink>
+            )}
+          </div>
+          <div className="my-4">
+            <div className="border-t border-gray-400 dark:border-gray-600 w-full"></div>
+          </div>
+          <div className="mt-2 text-center text-xs text-gray-500 dark:text-maroon-secondary italic">
+            Thanks to Netgalley & publisher for this ARC in exchange for honest review!
+          </div>
+        </div>
       </div>
       
       {/* Read-Alikes Image */}
@@ -313,13 +282,6 @@ export const ReviewDetail = () => {
           </div>
         </div>
       )}
-      
-      {/* Back to Reviews */}
-      <div className="mt-6">
-        <SmartLink to="/reviews" className="text-rose-600 hover:underline">
-          ← Back to All Reviews
-        </SmartLink>
-      </div>
       
       {/* Edit Modal */}
       {showEditModal && (

@@ -46,4 +46,14 @@ export const isExternalLink = (url: string): boolean => {
   } catch {
     return false;
   }
+};
+
+// Slugify a string for use in URLs
+export const slugify = (text: string): string => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
+    .replace(/^-+|-+$/g, '');    // Remove leading/trailing hyphens
 }; 

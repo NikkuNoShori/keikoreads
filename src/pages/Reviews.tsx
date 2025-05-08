@@ -391,16 +391,15 @@ export const Reviews = () => {
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {books.map((book) => (
-              <div key={book.id} className="w-full max-w-[180px] mx-auto">
-                <BookCard 
-                  book={book} 
-                  onEdit={() => handleEditBook(book)}
-                  onDelete={() => handleDeleteBook(book)}
-                  selectMode={selectMode}
-                  isSelected={selectedBooks.has(book.id)}
-                  onToggleSelect={toggleBookSelection}
-                />
-              </div>
+              <BookCard 
+                key={book.id}
+                book={book} 
+                onEdit={() => handleEditBook(book)}
+                onDelete={() => handleDeleteBook(book)}
+                selectMode={selectMode}
+                isSelected={selectedBooks.has(book.id)}
+                onToggleSelect={toggleBookSelection}
+              />
             ))}
           </div>
           {renderPagination()}

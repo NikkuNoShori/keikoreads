@@ -3,13 +3,17 @@ import { Home } from './pages/Home';
 import { About } from './pages/About';
 import { Reviews } from './pages/Reviews';
 import { Contact } from './pages/Contact';
-import { BookDetail } from './pages/BookDetail';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { AuthCallback } from './pages/AuthCallback';
 import { Settings } from './pages/Settings';
 import { SmartLink } from './components/SmartLink';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { ReviewDetail } from './pages/ReviewDetail';
+import { useEffect, useState } from 'react';
+import { useParams, Navigate } from 'react-router-dom';
+import { getBookById } from './utils/bookService';
+import { slugify } from './utils/formatters';
 
 // Create a verification notice page
 const VerifyEmail = () => (
@@ -35,6 +39,28 @@ const NotFound = () => (
     <SmartLink to="/" className="text-rose-600 hover:underline">Go back home</SmartLink>
   </div>
 );
+
+// Redirect from /reviews/:id to /reviews/:slug
+const RedirectToSlug = () => {
+  const { id } = useParams();
+  const [slug, setSlug] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchSlug = async () => {
+      if (!id) return;
+      const { data } = await getBookById(id);
+      if (data && data.title) {
+        setSlug(slugify(data.title));
+      }
+    };
+    fetchSlug();
+  }, [id]);
+
+  if (slug) {
+    return <Navigate to={`/reviews/${slug}`} replace />;
+  }
+  return null;
+};
 
 export const AppRoutes = () => (
   <Routes>
@@ -69,12 +95,16 @@ export const AppRoutes = () => (
       } 
     />
     <Route 
-      path="/reviews/:id" 
+      path="/reviews/:slug"
       element={
         <ProtectedRoute requireAuth={false}>
-          <BookDetail />
+          <ReviewDetail />
         </ProtectedRoute>
-      } 
+      }
+    />
+    <Route
+      path="/reviews/:id"
+      element={<RedirectToSlug />}
     />
     
     {/* Catch all - 404 */}
