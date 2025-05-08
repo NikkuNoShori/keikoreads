@@ -5,6 +5,7 @@ import { SmartLink } from './SmartLink';
 import { useAuthContext } from '../context/AuthContext';
 import { SimpleDropdown } from './SimpleDropdown';
 import { useState } from 'react';
+import { Container } from './Container';
 // import { useTheme } from '../hooks/useTheme';
 
 interface HeaderProps {
@@ -30,6 +31,7 @@ export const Header = ({ isDarkMode, toggleDarkMode }: HeaderProps) => {
   const navigate = useNavigate();
   // Using this to force a refresh after sign out
   const [, setRefresh] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   // const [isDarkMode, toggleDarkMode] = useTheme();
 
   // Sign out handler
@@ -198,36 +200,129 @@ export const Header = ({ isDarkMode, toggleDarkMode }: HeaderProps) => {
           className="w-56 max-w-xs h-auto mb-2 mx-auto drop-shadow-lg dark:filter dark:invert"
         />
       </div>
-      {/* Navigation with dark mode toggle and user profile on right */}
-      <nav className="relative z-20 w-full border-t border-b border-rose-gold py-1 bg-white/80 dark:bg-gray-800/80 flex items-center justify-center">
-        <ul className="flex flex-row justify-center items-center gap-2 m-0 p-0 list-none flex-1">
+      {/* Hamburger for mobile - now below the logo, edge to edge */}
+      <div className="w-full sm:hidden flex flex-col items-stretch">
+        <button
+          className="w-full block z-30 p-3 bg-white/80 dark:bg-gray-800/80 border-t border-b border-gray-300 dark:border-gray-700 text-left"
+          onClick={() => setMobileMenuOpen((open) => !open)}
+          aria-label="Open navigation menu"
+        >
+          <svg className="w-7 h-7 text-gray-700 dark:text-gray-200 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+      {/* Mobile menu overlay below the button, edge to edge */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-40 sm:hidden flex items-start justify-center">
+          {/* Backdrop that closes menu on click */}
+          <div className="fixed inset-0 bg-black/60 z-40" onClick={() => setMobileMenuOpen(false)} />
+          {/* Centered menu container */}
+          <div className="relative z-50 w-full flex justify-center mt-[calc(100px+56px)]">
+            <Container className="bg-white dark:bg-gray-900 shadow-lg p-6 flex flex-col gap-4">
+              <nav onClick={e => e.stopPropagation()}>
+                <ul className="flex flex-col gap-2 w-full">
+                  {['Home', 'About', 'Reviews', 'Contact'].map((label) => (
+                    <li key={label} className="w-full">
+                      <SmartLink
+                        to={label === 'Home' ? '/' : `/${label.toLowerCase()}`}
+                        className="block w-full text-lg text-gray-700 dark:text-maroon-text py-2 px-4 rounded hover:bg-rose-100 dark:hover:bg-maroon-accent text-center transition-colors"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {label}
+                      </SmartLink>
+                    </li>
+                  ))}
+                </ul>
+                {/* Divider between nav and user menu */}
+                <div className="w-full border-t border-gray-200 dark:border-gray-700 my-2" />
+                {/* User info and actions for mobile */}
+                {isAuthenticated ? (
+                  <div className="flex flex-col items-center gap-2 w-full">
+                    <div className="flex items-center gap-2 mb-2">
+                      {getAvatar() ? (
+                        <img
+                          src={getAvatar()!}
+                          alt="Profile"
+                          className="w-8 h-8 rounded-full object-cover border border-gray-200 dark:border-gray-700"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300">
+                          {getDisplayName().charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <span className="text-base font-medium text-gray-700 dark:text-gray-300">
+                        Hi, {getDisplayName()}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => { setMobileMenuOpen(false); navigate('/settings'); }}
+                      className="block w-full text-lg text-gray-700 dark:text-maroon-text py-2 px-4 rounded hover:bg-rose-100 dark:hover:bg-maroon-accent text-center transition-colors"
+                    >
+                      Settings
+                    </button>
+                    <button
+                      onClick={() => { setMobileMenuOpen(false); handleSignOut(); }}
+                      className="block w-full text-lg text-gray-700 dark:text-maroon-text py-2 px-4 rounded hover:bg-rose-100 dark:hover:bg-maroon-accent text-center transition-colors"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-2 w-full">
+                    <button
+                      onClick={() => { setMobileMenuOpen(false); navigate('/login'); }}
+                      className="block w-full text-lg text-gray-700 dark:text-maroon-text py-2 px-4 rounded hover:bg-rose-100 dark:hover:bg-maroon-accent text-center transition-colors"
+                    >
+                      Sign In
+                    </button>
+                    <button
+                      onClick={() => { setMobileMenuOpen(false); navigate('/signup'); }}
+                      className="block w-full text-lg text-gray-700 dark:text-maroon-text py-2 px-4 rounded hover:bg-rose-100 dark:hover:bg-maroon-accent text-center transition-colors"
+                    >
+                      Sign Up
+                    </button>
+                  </div>
+                )}
+                {/* Always show dark mode toggle at the bottom of the mobile menu */}
+                <div className="w-full flex justify-center items-center">
+                  <DarkModeToggle isDarkMode={isDarkMode} onToggle={toggleDarkMode} />
+                </div>
+              </nav>
+            </Container>
+          </div>
+        </div>
+      )}
+      {/* Desktop nav */}
+      <nav className="relative z-20 w-full border-t border-b border-rose-gold py-1 bg-white/80 dark:bg-gray-800/80 flex-col sm:flex-row items-center justify-center overflow-x-auto sm:overflow-x-visible hidden sm:flex">
+        <ul className="flex flex-row flex-nowrap sm:flex-wrap justify-center items-center gap-0 sm:gap-2 m-0 p-0 list-none flex-1 w-full max-w-full px-0 sm:px-6">
           {['Home', 'About', 'Reviews', 'Contact'].map((label, idx, arr) => (
-            <li key={label} className="flex flex-row items-center">
+            <li key={label} className="w-full sm:w-auto text-center">
               <SmartLink
                 to={
                   label === 'Home'
                     ? '/' 
                     : `/${label.toLowerCase()}`
                 }
-                className="text-gray-700 dark:text-maroon-text no-underline text-base py-1 px-6 block hover:text-rose-600 dark:hover:text-rose-300 transition-colors duration-300"
+                className="block text-gray-700 dark:text-maroon-text no-underline text-base py-2 px-4 sm:py-1 sm:px-6 hover:text-rose-600 dark:hover:text-rose-300 transition-colors duration-300"
               >
                 {label}
               </SmartLink>
               {idx < arr.length - 1 && (
-                <span className="text-gray-400 mx-1 select-none">&bull;</span>
+                <span className="hidden sm:inline text-gray-400 mx-1 select-none">&bull;</span>
               )}
             </li>
           ))}
         </ul>
-        
-        {/* User menu with proper positioning */}
-        <div className="flex items-center pr-4" style={{ position: 'relative', zIndex: 999 }}>
-          <SimpleDropdown
-            buttonContent={dropdownButtonContent}
-            menuContent={dropdownMenuContent}
-            className="z-[999]"
-            menuPosition="right"
-          />
+        <div className="relative w-full sm:static sm:w-auto flex justify-center sm:justify-end pr-0 sm:pr-4 mt-2 sm:mt-0">
+          <div className="sm:static absolute top-0 left-0 right-0 z-50 flex justify-center sm:justify-end">
+            <SimpleDropdown
+              buttonContent={dropdownButtonContent}
+              menuContent={dropdownMenuContent}
+              className="z-[999]"
+              menuPosition="right"
+            />
+          </div>
         </div>
       </nav>
     </header>
