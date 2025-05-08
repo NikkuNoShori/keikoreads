@@ -5,7 +5,12 @@ import { SmartLink } from './SmartLink';
 import { useAuthContext } from '../context/AuthContext';
 import { SimpleDropdown } from './SimpleDropdown';
 import { useState } from 'react';
-import { useTheme } from '../hooks/useTheme';
+// import { useTheme } from '../hooks/useTheme';
+
+interface HeaderProps {
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
+}
 
 /**
  * Header component with navigation and user dropdown menu
@@ -20,12 +25,12 @@ import { useTheme } from '../hooks/useTheme';
  * 1. Authenticated: Shows user avatar/name, Settings, Sign out
  * 2. Unauthenticated: Shows Sign in, Sign up
  */
-export const Header = () => {
+export const Header = ({ isDarkMode, toggleDarkMode }: HeaderProps) => {
   const { user, signOut, isAuthenticated, profile } = useAuthContext();
   const navigate = useNavigate();
   // Using this to force a refresh after sign out
   const [, setRefresh] = useState(0);
-  const [isDarkMode, toggleDarkMode] = useTheme();
+  // const [isDarkMode, toggleDarkMode] = useTheme();
 
   // Sign out handler
   const handleSignOut = async () => {

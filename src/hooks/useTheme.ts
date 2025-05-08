@@ -1,3 +1,4 @@
+// This hook is the single source of truth for dark mode state in the app. Use this everywhere you need to read or toggle dark mode.
 import { useEffect, useState, useCallback } from "react";
 
 const THEME_KEY = "theme";

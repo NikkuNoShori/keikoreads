@@ -5,9 +5,10 @@ import { AppRoutes } from './routes';
 import { AuthProvider } from './context/AuthContext';
 import { forceSignOut } from './utils/authDebug';
 import { DebugMenu } from './components/DebugMenu';
+import { useTheme } from './hooks/useTheme';
 
 function App() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, toggleDarkMode] = useTheme();
   const [isAuthCleared, setIsAuthCleared] = useState(false);
 
   // Check for localStorage flag to clear authentication - development only
@@ -28,36 +29,13 @@ function App() {
     checkAndClearAuth();
   }, [isAuthCleared]);
 
-  useEffect(() => {
-    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
-    setIsDarkMode(savedDarkMode);
-    if (savedDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, []);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode((prev) => {
-      localStorage.setItem('darkMode', (!prev).toString());
-      if (!prev) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-      return !prev;
-    });
-  };
-
   return (
     <AuthProvider>
       <Router>
         <Layout isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode}>
           <AppRoutes />
         </Layout>
-        {/* Show debug menu in development */}
-        {process.env.NODE_ENV === 'development' && <DebugMenu />}
+        {/* DebugMenu removed for security */}
       </Router>
     </AuthProvider>
   );
