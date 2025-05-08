@@ -260,11 +260,11 @@ export const Reviews = () => {
       {/* Modal for New/Edit Review */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-hidden">
-          <div className="bg-white dark:bg-gray-800 shadow-2xl rounded-2xl max-w-md w-full p-1 relative max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-white dark:scrollbar-thumb-maroon-card dark:scrollbar-track-gray-900">
-            <h2 className="text-2xl font-semibold font-serif italic text-center bg-transparent dark:bg-gray-800 py-2 rounded-t-2xl">
+          <div className="bg-white dark:bg-gray-800 shadow-2xl rounded-2xl max-w-3xl w-full p-6 px-0 my-12 relative max-h-[80vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-white dark:scrollbar-thumb-maroon-card dark:scrollbar-track-gray-900">
+            <h2 className="text-2xl font-semibold font-serif italic text-center bg-transparent dark:bg-gray-800 py-1 rounded-t-2xl">
               {editingBook ? 'Edit Book Review' : 'New Book Review'}
             </h2>
-            <div className="h-1 w-24 bg-maroon-card rounded-full mx-auto mb-0"></div>
+            <div className="h-1 w-24 bg-maroon-card rounded-full mx-auto mb-1"></div>
             <BookForm 
               initialData={editingBook || undefined}
               onSubmit={handleBookSubmit} 
@@ -316,7 +316,7 @@ export const Reviews = () => {
               placeholder="Search by title, author, or description"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-grow px-3 py-2 border-0 focus:ring-0 focus:outline-none dark:bg-gray-800 dark:text-white"
+              className="flex-grow px-3 py-2 border-0 focus:ring-0 focus:outline-none bg-white dark:bg-transparent dark:text-white"
             />
             <button
               type="submit"

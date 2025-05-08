@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthContext } from '../context/AuthContext';
 import { ProtectedRoute } from '../components/ProtectedRoute';
+import { supabase } from '../utils/supabaseClient';
 
 interface ValidationErrors {
   first_name?: string;
@@ -20,6 +21,14 @@ export const Settings = () => {
   useEffect(() => {
     setLocalProfile(profile);
   }, [profile]);
+
+  // Clear the update success message after 3 seconds
+  useEffect(() => {
+    if (updateSuccess) {
+      const timer = setTimeout(() => setUpdateSuccess(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [updateSuccess]);
 
   // Input validation
   const validateInput = (name: string, value: string): string | undefined => {
@@ -90,9 +99,7 @@ export const Settings = () => {
     try {
       // Prepare data for update - all editable fields
       const { id, first_name, last_name, date_of_birth, email, avatar_url } = localProfile;
-      
       const updateData = {
-        id,
         first_name,
         last_name,
         date_of_birth,
@@ -100,17 +107,29 @@ export const Settings = () => {
         avatar_url
       };
 
-      const response = await fetch('/api/update-profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updateData),
-      });
+      const { error } = await supabase
+        .from('profiles')
+        .update(updateData)
+        .eq('id', id);
 
-      if (!response.ok) {
-        throw new Error('Failed to update profile');
+      if (error) {
+        throw new Error(error.message);
       }
 
-      await refreshProfile();
+      // Fetch the latest profile from Supabase
+      const { data: updatedProfile, error: fetchError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (!fetchError && updatedProfile) {
+        setLocalProfile(updatedProfile);
+        await refreshProfile();
+        // Broadcast profile update to other tabs
+        localStorage.setItem('profileUpdated', Date.now().toString());
+      }
+
       setUpdateSuccess(true);
     } catch (err) {
       console.error('Profile update error:', err);
@@ -177,7 +196,7 @@ export const Settings = () => {
               )}
               
               {activeTab === 'profile' && localProfile && (
-                <div>
+                <form onSubmit={e => { e.preventDefault(); saveProfile(); }}>
                   <h2 className="text-xl font-semibold mb-6">Profile Settings</h2>
                   <div className="mb-6">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -260,20 +279,26 @@ export const Settings = () => {
                       name="email"
                       value={localProfile.email || ''}
                       onChange={handleInputChange}
-                      className={`w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
+                      className={`w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${!!(user?.app_metadata?.provider && user.app_metadata.provider !== 'email') ? 'bg-gray-100 dark:bg-gray-800 opacity-60 cursor-not-allowed' : ''}`}
+                      disabled={!!(user?.app_metadata?.provider && user.app_metadata.provider !== 'email')}
                     />
+                    {user?.app_metadata?.provider && user.app_metadata.provider !== 'email' && (
+                      <p className="mt-1 text-xs text-blue-600 dark:text-blue-300">
+                        Email address is managed by your OAuth provider (e.g., Google). To change your email, update it in your provider account. It will sync here next time you log in with that provider.
+                      </p>
+                    )}
                     {errors.email && (
                       <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>
                     )}
                   </div>
                   <button
+                    type="submit"
                     className="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700 transition-colors dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={saveProfile}
                     disabled={loading || profileLoading}
                   >
                     {loading || profileLoading ? 'Saving...' : 'Save Changes'}
                   </button>
-                </div>
+                </form>
               )}
               {activeTab === 'account' && localProfile && (
                 <div>

@@ -14,6 +14,7 @@ export const Signup = () => {
   const [error, setError] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [welcomeBack, setWelcomeBack] = useState<string | null>(null);
   
   const { signUp, signInWithOAuth, isAuthenticated } = useAuthContext();
   const navigate = useNavigate();
@@ -35,6 +36,12 @@ export const Signup = () => {
     if (authWarning) {
       setWarning(authWarning);
       localStorage.removeItem('authWarning');
+    }
+
+    const welcomeBackMsg = localStorage.getItem('welcomeBack');
+    if (welcomeBackMsg) {
+      setWelcomeBack(welcomeBackMsg);
+      localStorage.removeItem('welcomeBack');
     }
   }, []);
   
@@ -85,6 +92,8 @@ export const Signup = () => {
     try {
       // Store the returnUrl in localStorage so we can access it after the OAuth redirect
       localStorage.setItem('authReturnUrl', returnUrl);
+      // Set a flag to indicate OAuth signup
+      localStorage.setItem('oauthSignup', '1');
       
       const { error } = await signInWithOAuth('google', true);
       
@@ -116,6 +125,12 @@ export const Signup = () => {
       {warning && (
         <div className="mb-4 p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded dark:bg-yellow-900 dark:text-yellow-200">
           {warning}
+        </div>
+      )}
+      
+      {welcomeBack && (
+        <div className="mb-4 p-3 bg-blue-100 border border-blue-400 text-blue-700 rounded dark:bg-blue-900 dark:text-blue-200">
+          {welcomeBack}
         </div>
       )}
       

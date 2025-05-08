@@ -74,7 +74,6 @@ interface AuthDebugHelper {
   signOut: typeof forceSignOut;
   checkStatus: typeof checkAuthStatus;
   clearData: typeof clearAuthData;
-  exposeToWindow: () => void;
 }
 
 /**
@@ -84,19 +83,4 @@ export const authDebugHelper: AuthDebugHelper = {
   signOut: forceSignOut,
   checkStatus: checkAuthStatus,
   clearData: clearAuthData,
-
-  // Helper to expose all functions to window
-  exposeToWindow: () => {
-    if (process.env.NODE_ENV === "development") {
-      // Extend window interface
-      (window as unknown as Record<string, AuthDebugHelper>).authDebug =
-        authDebugHelper;
-      console.log("Auth debug functions exposed to window.authDebug");
-    }
-  },
 };
-
-// Auto-expose in development
-if (process.env.NODE_ENV === "development") {
-  authDebugHelper.exposeToWindow();
-}

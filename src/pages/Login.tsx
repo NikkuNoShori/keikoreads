@@ -13,6 +13,7 @@ export const Login = () => {
   const [oauthLoading, setOAuthLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
+  const [oauthNotice, setOauthNotice] = useState(false);
   
   const { signIn, signInWithOAuth, isAuthenticated } = useAuthContext();
   const navigate = useNavigate();
@@ -34,6 +35,15 @@ export const Login = () => {
     if (authWarning) {
       setWarning(authWarning);
       localStorage.removeItem('authWarning');
+    }
+  }, []);
+  
+  // Detect OAuth signup
+  useEffect(() => {
+    const oauthFlag = localStorage.getItem('oauthSignup');
+    if (oauthFlag) {
+      setOauthNotice(true);
+      localStorage.removeItem('oauthSignup');
     }
   }, []);
   
@@ -134,18 +144,21 @@ export const Login = () => {
       title="Welcome back"
       subtitle="Sign in to your account to continue"
     >
+      {oauthNotice && (
+        <div className="mb-4 p-3 bg-blue-100 border border-blue-400 text-blue-700 rounded dark:bg-blue-900 dark:text-blue-200">
+          You signed up with Google. Please use “Sign in with Google” to log in.
+        </div>
+      )}
       {error && (
         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded dark:bg-red-900 dark:text-red-200">
           {error}
         </div>
       )}
-      
       {warning && (
         <div className="mb-4 p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded dark:bg-yellow-900 dark:text-yellow-200">
           {warning}
         </div>
       )}
-
       <div className="mt-6">
         <OAuthButton 
           provider="google" 
@@ -153,7 +166,6 @@ export const Login = () => {
           disabled={oauthLoading || loading}
         />
       </div>
-
       <div className="mt-6 relative">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
@@ -164,74 +176,72 @@ export const Login = () => {
           </span>
         </div>
       </div>
-      
-      <form className="mt-6 space-y-6" onSubmit={handleSubmit}>
-        <div>
-          <label 
-            htmlFor="email" 
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
-            Email address
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            placeholder="you@example.com"
-          />
-        </div>
-        
-        <div>
-          <label 
-            htmlFor="password" 
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            placeholder="••••••••"
-          />
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <input
-              id="remember-me"
-              name="remember-me"
-              type="checkbox"
-              className="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600"
-            />
-            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-              Remember me
+      {!oauthNotice && (
+        <form className="mt-6 space-y-6" onSubmit={handleSubmit} autoComplete="off">
+          <div>
+            <label 
+              htmlFor="email" 
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Email address
             </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="off"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              placeholder="you@example.com"
+            />
           </div>
+          <div>
+            <label 
+              htmlFor="password" 
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="off"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              placeholder="••••••••"
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                name="remember-me"
+                type="checkbox"
+                className="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600"
+              />
+              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                Remember me
+              </label>
+            </div>
 
-          <div className="text-sm">
-            <a href="#" className="font-medium text-rose-600 hover:text-rose-500 dark:text-rose-400">
-              Forgot password?
-            </a>
+            <div className="text-sm">
+              <a href="#" className="font-medium text-rose-600 hover:text-rose-500 dark:text-rose-400">
+                Forgot password?
+              </a>
+            </div>
           </div>
-        </div>
-        
-        <div>
           <button
             type="submit"
-            disabled={loading || oauthLoading}
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-maroon-card dark:hover:bg-maroon-accent transition-colors"
+            disabled={loading}
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
-        </div>
-      </form>
+        </form>
+      )}
       
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-600 dark:text-gray-400">
