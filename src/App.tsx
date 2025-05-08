@@ -4,7 +4,6 @@ import { Layout } from './components/Layout';
 import { AppRoutes } from './routes';
 import { AuthProvider } from './context/AuthContext';
 import { forceSignOut } from './utils/authDebug';
-import { DebugMenu } from './components/DebugMenu';
 import { useTheme } from './hooks/useTheme';
 
 function App() {
@@ -35,7 +34,6 @@ function App() {
         <Layout isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode}>
           <AppRoutes />
         </Layout>
-        {/* DebugMenu removed for security */}
       </Router>
     </AuthProvider>
   );

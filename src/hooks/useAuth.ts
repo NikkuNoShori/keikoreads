@@ -87,21 +87,12 @@ export const useAuth = () => {
     return existingProfile;
   };
 
-  // Centralized effect: on user/session change, upsert/fetch profile
+  // Centralized effect: on user/session change, only fetch profile (do not upsert from OAuth/session)
   useEffect(() => {
     const syncProfile = async () => {
       if (authState.user) {
-        // Upsert from OAuth/session
-        await upsertProfileFromOAuth(authState.user);
-        // Fetch profile
+        // Only fetch the profile, do not upsert from OAuth/session
         await fetchProfile(authState.user);
-
-        // Handle redirect after successful OAuth
-        const returnUrl = localStorage.getItem("authReturnUrl");
-        if (returnUrl) {
-          localStorage.removeItem("authReturnUrl");
-          window.location.href = returnUrl;
-        }
       } else {
         setProfile(null);
       }
@@ -330,6 +321,24 @@ export const useAuth = () => {
     if (authState.user) {
       checkOAuthCallback(authState.user).catch(console.error);
     }
+  }, [authState.user]);
+
+  // Listen for profile updates from other tabs
+  useEffect(() => {
+    const onProfileUpdated = () => {
+      if (authState.user) {
+        fetchProfile(authState.user);
+      }
+    };
+    const storageListener = (e: StorageEvent) => {
+      if (e.key === 'profileUpdated') {
+        onProfileUpdated();
+      }
+    };
+    window.addEventListener('storage', storageListener);
+    return () => {
+      window.removeEventListener('storage', storageListener);
+    };
   }, [authState.user]);
 
   return {

@@ -1,3 +1,21 @@
+-- Drop the old policy (if needed)
+DROP POLICY IF EXISTS "Users can view their own profile" ON public.profiles;
+
+-- Create the improved policy
+CREATE POLICY "Users can view their own profile"
+  ON public.profiles
+  FOR SELECT
+  USING (id = (select auth.uid()));
+
+  -- Drop the old update policy (if needed)
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
+
+-- Create the improved update policy
+CREATE POLICY "Users can update their own profile"
+  ON public.profiles
+  FOR UPDATE
+  USING (id = (select auth.uid()));
+  
 -- Create profiles table
 CREATE TABLE IF NOT EXISTS profiles (
   id UUID PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
