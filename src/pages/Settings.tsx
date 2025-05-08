@@ -279,8 +279,8 @@ export const Settings = () => {
                       name="email"
                       value={localProfile.email || ''}
                       onChange={handleInputChange}
-                      className={`w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${user?.app_metadata?.provider && user.app_metadata.provider !== 'email' ? 'bg-gray-100 dark:bg-gray-800 opacity-60 cursor-not-allowed' : ''}`}
-                      disabled={user?.app_metadata?.provider && user.app_metadata.provider !== 'email'}
+                      className={`w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${!!(user?.app_metadata?.provider && user.app_metadata.provider !== 'email') ? 'bg-gray-100 dark:bg-gray-800 opacity-60 cursor-not-allowed' : ''}`}
+                      disabled={!!(user?.app_metadata?.provider && user.app_metadata.provider !== 'email')}
                     />
                     {user?.app_metadata?.provider && user.app_metadata.provider !== 'email' && (
                       <p className="mt-1 text-xs text-blue-600 dark:text-blue-300">
