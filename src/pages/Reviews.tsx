@@ -51,17 +51,6 @@ export const Reviews = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
-  // Toggle review selection
-  const toggleBookSelection = (bookId: string) => {
-    const newSelectedBooks = new Set(selectedBooks);
-    if (newSelectedBooks.has(bookId)) {
-      newSelectedBooks.delete(bookId);
-    } else {
-      newSelectedBooks.add(bookId);
-    }
-    setSelectedBooks(newSelectedBooks);
-  };
-  
   // Toggle select mode
   const toggleSelectMode = () => {
     setSelectMode(!selectMode);
@@ -391,16 +380,13 @@ export const Reviews = () => {
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {books.map((book) => (
-              <div key={book.id} className="w-full max-w-[180px] mx-auto">
-                <BookCard 
-                  book={book} 
-                  onEdit={() => handleEditBook(book)}
-                  onDelete={() => handleDeleteBook(book)}
-                  selectMode={selectMode}
-                  isSelected={selectedBooks.has(book.id)}
-                  onToggleSelect={toggleBookSelection}
-                />
-              </div>
+              <BookCard 
+                key={book.id}
+                book={book} 
+                onEdit={() => handleEditBook(book)}
+                onDelete={() => handleDeleteBook(book)}
+                selectMode={selectMode}
+              />
             ))}
           </div>
           {renderPagination()}

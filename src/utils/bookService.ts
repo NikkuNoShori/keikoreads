@@ -171,4 +171,14 @@ export const getUniqueAuthors = async (): Promise<{ data: string[] | null; error
     console.error('Error fetching authors:', error);
     return { data: null, error: error instanceof Error ? error : new Error('Unknown error') };
   }
+};
+
+// Fetch a book by slug
+export const getBookBySlug = async (slug: string) => {
+  const { data, error } = await supabase
+    .from('books')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+  return { data, error };
 }; 

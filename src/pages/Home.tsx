@@ -11,11 +11,13 @@ export const Home = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
         {/* Left Column: flex-col container, top-aligned, horizontally centered */}
         <div className="flex flex-col items-center justify-start w-full gap-2">
-          <img
-            src="/assets/keiko_Reads_2.png"
-            alt="Keiko Reads Profile"
-            className="w-48 h-48 rounded-full object-cover border-4 border-rose-gold dark:border-maroon-card shadow-lg mb-2"
-          />
+          <div className="w-full max-w-sm mx-auto mb-2">
+            <img
+              src="/assets/keiko_Reads_2.png"
+              alt="Keiko Reads Profile"
+              className="w-full aspect-square rounded-full object-cover border-4 border-rose-gold dark:border-maroon-card shadow-lg"
+            />
+          </div>
           <div className="bg-white dark:bg-transparent py-3 px-3 rounded-lg text-center shadow dark:text-maroon-text w-full flex flex-col justify-center min-h-[100px] max-w-sm mx-auto mb-4">
             <h2 className="mb-1 text-2xl font-semibold">Hi friend!</h2>
             <p className="m-0 leading-relaxed text-base flex-1 flex items-center justify-center">
@@ -72,9 +74,7 @@ export const Home = () => {
                 })
                 .slice(0, 3)
                 .map((book) => (
-                  <div key={book.id} className="w-full max-w-[180px]">
-                    <BookCard book={book} />
-                  </div>
+                  <BookCard key={book.id} book={book} />
                 ))}
             </div>
           )}

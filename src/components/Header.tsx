@@ -297,7 +297,7 @@ export const Header = ({ isDarkMode, toggleDarkMode }: HeaderProps) => {
       <nav className="relative z-20 w-full border-t border-b border-rose-gold py-1 bg-white/80 dark:bg-gray-800/80 flex-col sm:flex-row items-center justify-center overflow-x-auto sm:overflow-x-visible hidden sm:flex">
         <ul className="flex flex-row flex-nowrap sm:flex-wrap justify-center items-center gap-0 sm:gap-2 m-0 p-0 list-none flex-1 w-full max-w-full px-0 sm:px-6">
           {['Home', 'About', 'Reviews', 'Contact'].map((label, idx, arr) => (
-            <li key={label} className="w-full sm:w-auto text-center">
+            <li key={label} className="w-full sm:w-auto text-center flex items-center justify-center">
               <SmartLink
                 to={
                   label === 'Home'
@@ -309,7 +309,7 @@ export const Header = ({ isDarkMode, toggleDarkMode }: HeaderProps) => {
                 {label}
               </SmartLink>
               {idx < arr.length - 1 && (
-                <span className="hidden sm:inline text-gray-400 mx-1 select-none">&bull;</span>
+                <span className="hidden sm:inline-flex items-center text-gray-400 mx-2 select-none align-middle">&bull;</span>
               )}
             </li>
           ))}

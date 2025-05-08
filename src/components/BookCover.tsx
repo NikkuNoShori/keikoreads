@@ -9,9 +9,9 @@ interface BookCoverProps {
 
 // Standard sizes for book covers to maintain consistency across the app
 const sizeClasses = {
-  sm: 'max-h-32',
-  md: 'max-h-48',
-  lg: 'max-h-64',
+  sm: 'max-h-[253px]',
+  md: 'max-h-[253px]',
+  lg: 'max-h-[253px]',
 };
 
 export const BookCover: React.FC<BookCoverProps> = ({ 
@@ -30,7 +30,7 @@ export const BookCover: React.FC<BookCoverProps> = ({
       <img
         src={coverImage || defaultImage}
         alt={`Cover for ${title}`}
-        className={`w-full h-full object-cover ${sizeClass}`}
+        className={`w-full h-full object-contain ${sizeClass}`}
         onError={(e) => {
           // If image fails to load, set to default
           (e.target as HTMLImageElement).src = defaultImage;
