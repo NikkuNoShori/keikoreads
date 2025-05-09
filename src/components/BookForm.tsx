@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Book, BookFormData, NewBook } from '../types/BookTypes';
-import { supabase } from '../utils/supabaseClient';
+import { uploadImage } from '../utils/imageUpload';
 
 interface BookFormProps {
   initialData?: Book;
@@ -38,7 +38,12 @@ export const BookForm = ({ initialData, onSubmit, onCancel, isSubmitting }: Book
       // Format dates for date inputs (YYYY-MM-DD)
       const formatDateForInput = (dateString?: string) => {
         if (!dateString) return '';
-        return new Date(dateString).toISOString().split('T')[0];
+        // If already in YYYY-MM-DD format, return as is
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return dateString;
+        const d = new Date(dateString);
+        if (isNaN(d.getTime())) return '';
+        // Format to YYYY-MM-DD
+        return d.toISOString().split('T')[0];
       };
 
       setFormData({
@@ -69,7 +74,17 @@ export const BookForm = ({ initialData, onSubmit, onCancel, isSubmitting }: Book
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files && e.target.files[0];
-    if (selected && (selected.type === 'image/png' || selected.type === 'image/jpeg')) {
+    if (selected) {
+      // Check file type
+      if (!selected.type.startsWith('image/')) {
+        alert('Please select an image file (JPEG, PNG, etc.)');
+        return;
+      }
+      // Check file size (max 5MB)
+      if (selected.size > 5 * 1024 * 1024) {
+        alert('Image size should be less than 5MB');
+        return;
+      }
       setFile(selected);
       setFormData({ ...formData, cover_image: '' }); // Clear URL if file selected
     } else {
@@ -81,22 +96,28 @@ export const BookForm = ({ initialData, onSubmit, onCancel, isSubmitting }: Book
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setUploading(true);
-    let coverImageUrl = formData.cover_image;
-    if (file) {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
-      const { error } = await supabase.storage.from('book-covers').upload(fileName, file);
-      if (error) {
-        alert('Image upload failed: ' + error.message);
-        setUploading(false);
-        return;
+    
+    try {
+      let coverImageUrl = formData.cover_image;
+      
+      // Upload new image if selected
+      if (file) {
+        const uploadedUrl = await uploadImage(file, 'covers/');
+        if (!uploadedUrl) {
+          throw new Error('Failed to upload image');
+        }
+        coverImageUrl = uploadedUrl;
       }
-      const { publicUrl } = supabase.storage.from('book-covers').getPublicUrl(fileName).data;
-      coverImageUrl = publicUrl;
+
+      // Submit form data with image URL
+      await onSubmit({ ...formData, cover_image: coverImageUrl });
+      setFile(null);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('Failed to submit form. Please try again.');
+    } finally {
+      setUploading(false);
     }
-    await onSubmit({ ...formData, cover_image: coverImageUrl });
-    setUploading(false);
-    setFile(null);
   };
 
   return (
@@ -164,13 +185,11 @@ export const BookForm = ({ initialData, onSubmit, onCancel, isSubmitting }: Book
         <div>
           <label htmlFor="publish_date" className="block font-medium mb-2 text-base text-gray-700 dark:text-maroon-text">Publish Date</label>
           <input
-            type="text"
+            type="date"
             id="publish_date"
             name="publish_date"
             value={formData.publish_date || ''}
             onChange={handleChange}
-            pattern="\\d{4}-\\d{2}-\\d{2}"
-            placeholder="YYYY-MM-DD or pick a date"
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-base text-gray-700 dark:text-maroon-text"
           />
         </div>
@@ -208,13 +227,11 @@ export const BookForm = ({ initialData, onSubmit, onCancel, isSubmitting }: Book
         <div>
           <label htmlFor="review_date" className="block font-medium mb-2 text-base text-gray-700 dark:text-maroon-text">Review Date</label>
           <input
-            type="text"
+            type="date"
             id="review_date"
             name="review_date"
             value={formData.review_date || ''}
             onChange={handleChange}
-            pattern="\\d{4}-\\d{2}-\\d{2}"
-            placeholder="YYYY-MM-DD or pick a date"
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-base text-gray-700 dark:text-maroon-text"
           />
         </div>

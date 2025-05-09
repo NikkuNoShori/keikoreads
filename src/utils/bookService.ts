@@ -71,12 +71,24 @@ export const getBookById = async (id: string): Promise<{ data: Book | null; erro
   }
 };
 
+// Generate a URL-friendly slug from a title
+const generateSlug = (title: string): string => {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric chars with hyphens
+    .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
+    .substring(0, 200); // Limit length
+};
+
 // Create a new book
 export const createBook = async (book: NewBook): Promise<{ data: Book | null; error: Error | null }> => {
   try {
+    // Generate slug from title
+    const slug = generateSlug(book.title);
+
     const { data, error } = await supabase
       .from('books')
-      .insert(book)
+      .insert({ ...book, slug })
       .select()
       .single();
 
@@ -94,11 +106,14 @@ export const createBook = async (book: NewBook): Promise<{ data: Book | null; er
 };
 
 // Update an existing book
-export const updateBook = async (id: string, book: Partial<Book>): Promise<{ data: Book | null; error: Error | null }> => {
+export const updateBook = async (id: string, book: NewBook): Promise<{ data: Book | null; error: Error | null }> => {
   try {
+    // Generate new slug if title has changed
+    const slug = book.title ? generateSlug(book.title) : undefined;
+
     const { data, error } = await supabase
       .from('books')
-      .update(book)
+      .update({ ...book, slug, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
       .single();

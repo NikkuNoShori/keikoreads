@@ -87,18 +87,18 @@ export const useAuth = () => {
     return existingProfile;
   };
 
-  // Centralized effect: on user/session change, only fetch profile (do not upsert from OAuth/session)
+  // Centralized effect: on user/session change, only fetch profile
   useEffect(() => {
     const syncProfile = async () => {
-      if (authState.user) {
-        // Only fetch the profile, do not upsert from OAuth/session
-        await fetchProfile(authState.user);
-      } else {
+      if (!authState.user) {
         setProfile(null);
+        return;
       }
+
+      // Always fetch the profile when user changes
+      await fetchProfile(authState.user);
     };
     syncProfile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authState.user]);
 
   useEffect(() => {
@@ -258,11 +258,24 @@ export const useAuth = () => {
 
   const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
+      // First clear all local state
+      setAuthState({
+        user: null,
+        session: null,
+        loading: false,
+        error: null
+      });
+      setProfile(null);
+      setProfileLoading(false);
 
-      if (error) {
-        throw error;
-      }
+      // Then sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
+      // Clear any stored OAuth state
+      localStorage.removeItem("oauthIntent");
+      localStorage.removeItem("welcomeBack");
+      localStorage.removeItem("authWarning");
 
       return { error: null };
     } catch (error) {
@@ -282,41 +295,34 @@ export const useAuth = () => {
     if (!user || !user.email) return;
 
     const oauthIntent = localStorage.getItem("oauthIntent");
-    if (!oauthIntent) return;
+    if (!oauthIntent) {
+      // No OAuth intent, still sync the profile
+      await upsertProfileFromOAuth(user);
+      return;
+    }
 
-    // Clear the intent regardless of what happens
+    // Clear the intent immediately to prevent duplicate processing
     localStorage.removeItem("oauthIntent");
 
-    // Check if the user exists in our profiles table
-    const userExists = await checkUserExists(user.email);
+    // Always upsert the profile first to ensure we have the latest data
+    await upsertProfileFromOAuth(user);
 
+    // Then handle any special messages
+    const userExists = await checkUserExists(user.email);
     if (oauthIntent === "signup" && userExists) {
-      // User tried to sign up but already exists
-      // Show a welcome back message instead of an error
       localStorage.setItem(
         "welcomeBack",
         "Welcome back! You've signed in with your existing account."
       );
-      // They've actually been signed in by Supabase already, so redirect to home or profile
-      // after showing the welcome message on the next page
     } else if (oauthIntent === "signin" && !userExists) {
-      // User tried to sign in but doesn't exist
-      // We need to create their profile since they authenticated successfully
-      await upsertProfileFromOAuth(user);
       localStorage.setItem(
         "authWarning",
         "New account created with your OAuth provider."
       );
-    } else if (oauthIntent === "signin" && userExists) {
-      // Normal sign in flow - just update the profile with latest OAuth data
-      await upsertProfileFromOAuth(user);
-    } else if (oauthIntent === "signup" && !userExists) {
-      // Normal sign up flow - create the profile
-      await upsertProfileFromOAuth(user);
     }
   };
 
-  // Add this to the useEffect that watches authState.user
+  // Handle OAuth callback on user change
   useEffect(() => {
     if (authState.user) {
       checkOAuthCallback(authState.user).catch(console.error);

@@ -64,12 +64,13 @@ export const Header = ({ isDarkMode, toggleDarkMode }: HeaderProps) => {
     if (profile?.avatar_url) {
       return profile.avatar_url;
     }
-    
     // Then try user metadata from OAuth
     if (user?.user_metadata?.avatar_url) {
       return user.user_metadata.avatar_url;
     }
-    
+    if (user?.user_metadata?.picture) {
+      return user.user_metadata.picture;
+    }
     return null;
   };
 

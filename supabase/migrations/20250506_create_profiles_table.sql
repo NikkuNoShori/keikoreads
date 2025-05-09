@@ -1,22 +1,9 @@
--- Drop the old policy (if needed)
+-- Drop the old policies
 DROP POLICY IF EXISTS "Users can view their own profile" ON public.profiles;
-
--- Create the improved policy
-CREATE POLICY "Users can view their own profile"
-  ON public.profiles
-  FOR SELECT
-  USING (id = (select auth.uid()));
-
-  -- Drop the old update policy (if needed)
 DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can insert their own profile" ON public.profiles;
 
--- Create the improved update policy
-CREATE POLICY "Users can update their own profile"
-  ON public.profiles
-  FOR UPDATE
-  USING (id = (select auth.uid()));
-  
--- Create profiles table
+-- Create profiles table if it doesn't exist
 CREATE TABLE IF NOT EXISTS profiles (
   id UUID PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
   first_name TEXT,
@@ -28,52 +15,41 @@ CREATE TABLE IF NOT EXISTS profiles (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Enable Row Level Security for profiles table
+-- Enable Row Level Security
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
--- Drop policies if they exist (for idempotency)
-DO $$
-BEGIN
-  IF EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view their own profile' AND tablename = 'profiles') THEN
-    EXECUTE 'DROP POLICY "Users can view their own profile" ON profiles;';
-  END IF;
-  IF EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can update their own profile' AND tablename = 'profiles') THEN
-    EXECUTE 'DROP POLICY "Users can update their own profile" ON profiles;';
-  END IF;
-  IF EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can insert their own profile' AND tablename = 'profiles') THEN
-    EXECUTE 'DROP POLICY "Users can insert their own profile" ON profiles;';
-  END IF;
-END $$;
+-- Create improved policies
+CREATE POLICY "Enable read access for authenticated users"
+  ON public.profiles
+  FOR SELECT
+  USING (auth.role() = 'authenticated');
 
--- Create policies
-CREATE POLICY "Users can view their own profile"
-  ON profiles FOR SELECT
-  USING (auth.uid() = id);
-
-CREATE POLICY "Users can update their own profile"
-  ON profiles FOR UPDATE
-  USING (auth.uid() = id);
-
-CREATE POLICY "Users can insert their own profile"
-  ON profiles FOR INSERT
+CREATE POLICY "Enable insert for authenticated users"
+  ON public.profiles
+  FOR INSERT
   WITH CHECK (auth.uid() = id);
 
--- Create function to handle user creation (only inserts id, other fields are upserted from app)
+CREATE POLICY "Enable update for users based on id"
+  ON public.profiles
+  FOR UPDATE
+  USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);
+
+-- Create function to handle new user creation
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id)
-  VALUES (new.id)
-  ON CONFLICT DO NOTHING;
+  INSERT INTO public.profiles (id, email)
+  VALUES (new.id, new.email)
+  ON CONFLICT (id) DO UPDATE
+  SET email = EXCLUDED.email,
+      updated_at = now();
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Drop and create trigger to automatically create profile when user signs up
+-- Create trigger for new user handling
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
-  
-ALTER TABLE profiles
-ADD COLUMN email TEXT;

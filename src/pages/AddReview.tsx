@@ -20,8 +20,8 @@ export const AddReview = () => {
         throw error;
       }
       
-      // Success! Redirect to the reviews page or the newly created review
-      navigate(data?.id ? `/reviews/${data.id}` : '/reviews');
+      // Success! Redirect to the review using the slug
+      navigate(data?.slug ? `/reviews/${data.slug}` : '/reviews');
     } catch (err) {
       console.error('Error creating review:', err);
       setError(err instanceof Error ? err.message : 'An unknown error occurred');

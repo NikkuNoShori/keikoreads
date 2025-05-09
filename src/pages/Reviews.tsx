@@ -121,8 +121,8 @@ export const Reviews = () => {
           await fetchBooks();
           closeModal();
           // If we're on the review page, navigate to refresh the data
-          if (window.location.pathname === `/reviews/${data.id}`) {
-            navigate(`/reviews/${data.id}`);
+          if (window.location.pathname === `/reviews/${data.slug}`) {
+            navigate(`/reviews/${data.slug}`);
           }
         } else {
           alert(error?.message || 'Error updating review');
@@ -134,7 +134,7 @@ export const Reviews = () => {
           await fetchBooks();
           closeModal();
           // Redirect to the new review detail page
-          navigate(`/reviews/${data.id}`);
+          navigate(`/reviews/${data.slug}`);
         } else {
           alert(error?.message || 'Error creating review');
         }
@@ -378,7 +378,7 @@ export const Reviews = () => {
           <p className="text-gray-700 dark:text-gray-300 mb-4">
             Found {totalCount} {totalCount === 1 ? 'review' : 'reviews'}
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center px-4">
             {books.map((book) => (
               <BookCard 
                 key={book.id}

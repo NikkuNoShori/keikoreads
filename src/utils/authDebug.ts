@@ -1,19 +1,6 @@
 import { supabase } from "./supabaseClient";
 
 /**
- * Force sign out for development purposes
- */
-export const forceSignOut = async (): Promise<void> => {
-  try {
-    await supabase.auth.signOut();
-    localStorage.removeItem("clearAuth");
-    console.log("User successfully signed out (forced)");
-  } catch (error) {
-    console.error("Error forcing sign out:", error);
-  }
-};
-
-/**
  * Check authentication status - useful for debugging
  */
 export const checkAuthStatus = async (): Promise<void> => {
@@ -27,12 +14,14 @@ export const checkAuthStatus = async (): Promise<void> => {
 
     if (data.session) {
       const user = data.session.user;
-      console.log("User is authenticated:");
-      console.log("  Email:", user.email);
-      console.log("  ID:", user.id);
-      console.log("  Auth Provider:", user.app_metadata?.provider || "email");
+      console.log("Auth status: Authenticated");
+      console.log("User:", {
+        email: user.email,
+        id: user.id,
+        provider: user.app_metadata?.provider || "email"
+      });
     } else {
-      console.log("User is NOT authenticated");
+      console.log("Auth status: Not authenticated");
     }
   } catch (error) {
     console.error("Exception checking auth status:", error);
@@ -71,7 +60,6 @@ export const clearAuthData = (): void => {
 
 // Create a type for the debug helper
 interface AuthDebugHelper {
-  signOut: typeof forceSignOut;
   checkStatus: typeof checkAuthStatus;
   clearData: typeof clearAuthData;
 }
@@ -80,7 +68,6 @@ interface AuthDebugHelper {
  * Debug helper for development - Run this in the browser console
  */
 export const authDebugHelper: AuthDebugHelper = {
-  signOut: forceSignOut,
   checkStatus: checkAuthStatus,
   clearData: clearAuthData,
 };

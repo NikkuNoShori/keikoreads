@@ -55,7 +55,7 @@ export const BookCard = ({
 
   return (
     <div className="book-card w-[240px] flex flex-col items-center bg-white dark:bg-maroon-container shadow-md rounded overflow-hidden transition-all duration-300 hover:shadow-lg group">
-      <div className="w-[240px] h-[340px] relative bg-gray-100 dark:bg-gray-700 rounded shadow overflow-hidden">
+      <div className="h-[340px] relative bg-gray-100 dark:bg-gray-700 rounded shadow overflow-hidden">
         {(onEdit || onDelete) && !selectMode && (
           <div className="absolute top-2 right-2 z-20" onClick={e => e.stopPropagation()}>
             <AuthorizedAction>
@@ -67,7 +67,7 @@ export const BookCard = ({
             </AuthorizedAction>
           </div>
         )}
-        <SmartLink to={`/reviews/${slugify(book.title)}`} className="block w-full h-full">
+        <SmartLink to={`/reviews/${book.slug}`} className="block w-full h-full">
           <img
             src={book.cover_image || ''}
             alt={`Cover for ${book.title}`}

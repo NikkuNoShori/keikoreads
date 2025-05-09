@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { clearAuthData, forceSignOut } from '../utils/authDebug';
+import { clearAuthData } from '../utils/authDebug';
+import { useAuthContext } from '../context/AuthContext';
 
 /**
  * Debug menu for development only - provides easy access to auth debug functions
  */
 export const DebugMenu: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { signOut } = useAuthContext();
 
   // Only render in development
   if (process.env.NODE_ENV !== 'development') {
@@ -14,6 +16,11 @@ export const DebugMenu: React.FC = () => {
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    setIsOpen(false);
   };
 
   return (
@@ -39,10 +46,7 @@ export const DebugMenu: React.FC = () => {
           <h3 className="text-xs font-bold px-3 py-1 border-b border-gray-200">Debug Tools</h3>
           
           <button
-            onClick={() => {
-              forceSignOut();
-              setIsOpen(false);
-            }}
+            onClick={handleSignOut}
             className="block w-full text-left px-3 py-1 text-sm text-gray-700 hover:bg-gray-100"
           >
             Force Sign Out
