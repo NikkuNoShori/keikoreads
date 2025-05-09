@@ -20,3 +20,6 @@
     --light-text: #B8B8B8; /* maroon-secondary */
   }
 }
+
+/* Import custom datepicker styles */
+@import './styles/datepicker.css';

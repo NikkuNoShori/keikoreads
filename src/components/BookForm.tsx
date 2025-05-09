@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Book, BookFormData, NewBook } from '../types/BookTypes';
 import { uploadImage } from '../utils/imageUpload';
+import { DatePicker } from './DatePicker';
 
 interface BookFormProps {
   initialData?: Book;
@@ -29,6 +30,10 @@ export const BookForm = ({ initialData, onSubmit, onCancel, isSubmitting }: Book
     read_alikes_image: ''
   });
 
+  // Add state for date objects
+  const [publishDate, setPublishDate] = useState<Date | null>(null);
+  const [reviewDate, setReviewDate] = useState<Date | null>(new Date());
+
   const [uploading, setUploading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
 
@@ -37,20 +42,20 @@ export const BookForm = ({ initialData, onSubmit, onCancel, isSubmitting }: Book
     if (initialData) {
       // Format dates for date inputs (YYYY-MM-DD)
       const formatDateForInput = (dateString?: string) => {
-        if (!dateString) return '';
-        // If already in YYYY-MM-DD format, return as is
-        if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return dateString;
+        if (!dateString) return null;
         const d = new Date(dateString);
-        if (isNaN(d.getTime())) return '';
-        // Format to YYYY-MM-DD
-        return d.toISOString().split('T')[0];
+        return isNaN(d.getTime()) ? null : d;
       };
 
       setFormData({
         ...initialData,
-        publish_date: formatDateForInput(initialData.publish_date),
-        review_date: formatDateForInput(initialData.review_date)
+        publish_date: initialData.publish_date || '',
+        review_date: initialData.review_date || new Date().toISOString().split('T')[0]
       });
+
+      // Set date states
+      setPublishDate(formatDateForInput(initialData.publish_date));
+      setReviewDate(formatDateForInput(initialData.review_date) || new Date());
     }
   }, [initialData]);
 
@@ -70,6 +75,23 @@ export const BookForm = ({ initialData, onSubmit, onCancel, isSubmitting }: Book
         [name]: value
       });
     }
+  };
+
+  // Handle date changes
+  const handlePublishDateChange = (date: Date | null) => {
+    setPublishDate(date);
+    setFormData(prev => ({
+      ...prev,
+      publish_date: date ? date.toISOString().split('T')[0] : ''
+    }));
+  };
+
+  const handleReviewDateChange = (date: Date | null) => {
+    setReviewDate(date);
+    setFormData(prev => ({
+      ...prev,
+      review_date: date ? date.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+    }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -184,13 +206,12 @@ export const BookForm = ({ initialData, onSubmit, onCancel, isSubmitting }: Book
         {/* Publish Date */}
         <div>
           <label htmlFor="publish_date" className="block font-medium mb-2 text-base text-gray-700 dark:text-maroon-text">Publish Date</label>
-          <input
-            type="date"
-            id="publish_date"
+          <DatePicker
+            selected={publishDate}
+            onChange={handlePublishDateChange}
             name="publish_date"
-            value={formData.publish_date || ''}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-base text-gray-700 dark:text-maroon-text"
+            placeholder="Select publish date"
+            maxDate={new Date()}
           />
         </div>
         {/* Pages */}
@@ -226,13 +247,12 @@ export const BookForm = ({ initialData, onSubmit, onCancel, isSubmitting }: Book
         {/* Review Date */}
         <div>
           <label htmlFor="review_date" className="block font-medium mb-2 text-base text-gray-700 dark:text-maroon-text">Review Date</label>
-          <input
-            type="date"
-            id="review_date"
+          <DatePicker
+            selected={reviewDate}
+            onChange={handleReviewDateChange}
             name="review_date"
-            value={formData.review_date || ''}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-base text-gray-700 dark:text-maroon-text"
+            placeholder="Select review date"
+            maxDate={new Date()}
           />
         </div>
         {/* Cover Image */}

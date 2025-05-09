@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuthContext } from '../context/AuthContext';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { supabase } from '../utils/supabaseClient';
+import { DatePicker } from '../components/DatePicker';
 
 interface ValidationErrors {
   first_name?: string;
@@ -17,8 +18,12 @@ export const Settings = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
 
   useEffect(() => {
+    if (profile?.date_of_birth) {
+      setDateOfBirth(new Date(profile.date_of_birth));
+    }
     setLocalProfile(profile);
   }, [profile]);
 
@@ -73,6 +78,24 @@ export const Settings = () => {
 
     // Reset success message when editing
     if (updateSuccess) setUpdateSuccess(false);
+  };
+
+  const handleDateOfBirthChange = (date: Date | null) => {
+    if (localProfile) {
+      const dateStr = date ? date.toISOString().split('T')[0] : null;
+      setDateOfBirth(date);
+      setLocalProfile({ ...localProfile, date_of_birth: dateStr });
+      
+      // Validate and update errors
+      const error = dateStr ? validateInput('date_of_birth', dateStr) : undefined;
+      setErrors(prev => ({
+        ...prev,
+        date_of_birth: error
+      }));
+
+      // Reset success message when editing
+      if (updateSuccess) setUpdateSuccess(false);
+    }
   };
 
   const isFormValid = (): boolean => {
@@ -257,13 +280,14 @@ export const Settings = () => {
                     <label htmlFor="date_of_birth" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Date of Birth
                     </label>
-                    <input
-                      type="date"
-                      id="date_of_birth"
+                    <DatePicker
+                      selected={dateOfBirth}
+                      onChange={handleDateOfBirthChange}
                       name="date_of_birth"
-                      value={localProfile.date_of_birth || ''}
-                      onChange={handleInputChange}
-                      className={`w-full px-3 py-2 border ${errors.date_of_birth ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-rose-500 focus:border-rose-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
+                      placeholder="Select your date of birth"
+                      hasError={!!errors.date_of_birth}
+                      maxDate={new Date()}
+                      minDate={new Date(new Date().setFullYear(new Date().getFullYear() - 120))}
                     />
                     {errors.date_of_birth && (
                       <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.date_of_birth}</p>
