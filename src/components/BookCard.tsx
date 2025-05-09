@@ -54,7 +54,7 @@ export const BookCard = ({
     : null;
 
   return (
-    <div className="book-card w-[280px] flex flex-col items-center bg-white dark:bg-maroon-container shadow-md rounded overflow-hidden transition-all duration-300 hover:shadow-lg group">
+    <div className="flex flex-col bg-white dark:bg-maroon-container shadow-md rounded overflow-hidden transition-all duration-300 hover:shadow-lg group w-[85%] mx-auto">
       <div className="h-[340px] relative bg-gray-100 dark:bg-gray-700 rounded shadow overflow-hidden">
         {(onEdit || onDelete) && !selectMode && (
           <div className="absolute top-2 right-2 z-20" onClick={e => e.stopPropagation()}>
@@ -86,7 +86,7 @@ export const BookCard = ({
           <span className="ml-1 text-xs text-gray-500 dark:text-maroon-secondary">({book.rating})</span>
         </div>
         {book.review_date && (
-          <p className="text-[10px] text-gray-400 dark:text-maroon-secondary mb-0">Reviewed: {formatDate(book.review_date)}</p>
+          <p className="text-[10px] text-gray-400 dark:text-maroon-secondary mb-2">Reviewed: {formatDate(book.review_date)}</p>
         )}
       </div>
     </div>
