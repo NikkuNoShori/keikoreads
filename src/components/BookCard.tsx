@@ -1,6 +1,6 @@
 // import { Link } from 'react-router-dom';
 import { Book } from '../types/BookTypes';
-import { formatDate, slugify } from '../utils/formatters';
+import { formatDate } from '../utils/formatters';
 import { SmartLink } from './SmartLink';
 import { BookMenu } from './BookMenu';
 import { AuthorizedAction } from './AuthorizedAction';
@@ -33,25 +33,6 @@ export const BookCard = ({
     }
     return stars;
   };
-
-  // Extract book number from series if available
-  const extractBookNumber = (series: string | null) => {
-    if (!series) return null;
-    
-    // Check if series contains "Book X" or "#X" pattern
-    const bookMatch = series.match(/book\s+(\d+)/i) || series.match(/#(\d+)/i);
-    if (bookMatch) {
-      return `Book ${bookMatch[1]}`;
-    }
-    return null;
-  };
-
-  const bookNumber = book.series ? extractBookNumber(book.series) : null;
-  const seriesName = book.series 
-    ? bookNumber 
-      ? book.series.replace(new RegExp(`book\\s+${bookNumber.replace('Book ', '')}|#${bookNumber.replace('Book ', '')}`, 'i'), '').trim() 
-      : book.series
-    : null;
 
   return (
     <div className="flex flex-col bg-white dark:bg-maroon-container shadow-md rounded overflow-hidden transition-all duration-300 hover:shadow-lg group w-[85%] mx-auto">

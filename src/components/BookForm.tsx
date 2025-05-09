@@ -14,7 +14,6 @@ export const BookForm = ({ initialData, onSubmit, onCancel, isSubmitting }: Book
   const [formData, setFormData] = useState<BookFormData>({
     title: '',
     author: '',
-    series: '',
     genre: '',
     publish_date: '',
     pages: undefined,
@@ -175,19 +174,6 @@ export const BookForm = ({ initialData, onSubmit, onCancel, isSubmitting }: Book
             required
             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-base text-gray-700 dark:text-maroon-text"
             placeholder="Enter author name"
-          />
-        </div>
-        {/* Series */}
-        <div>
-          <label htmlFor="series" className="block font-medium mb-2 text-base text-gray-700 dark:text-maroon-text">Series</label>
-          <input
-            type="text"
-            id="series"
-            name="series"
-            value={formData.series || ''}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 placeholder-gray-400 dark:placeholder-maroon-secondary text-base text-gray-700 dark:text-maroon-text"
-            placeholder="Book series (if applicable)"
           />
         </div>
         {/* Genre */}
