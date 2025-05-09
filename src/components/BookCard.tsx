@@ -54,7 +54,7 @@ export const BookCard = ({
     : null;
 
   return (
-    <div className="book-card w-[240px] flex flex-col items-center bg-white dark:bg-maroon-container shadow-md rounded overflow-hidden transition-all duration-300 hover:shadow-lg group">
+    <div className="book-card w-[280px] flex flex-col items-center bg-white dark:bg-maroon-container shadow-md rounded overflow-hidden transition-all duration-300 hover:shadow-lg group">
       <div className="h-[340px] relative bg-gray-100 dark:bg-gray-700 rounded shadow overflow-hidden">
         {(onEdit || onDelete) && !selectMode && (
           <div className="absolute top-2 right-2 z-20" onClick={e => e.stopPropagation()}>
@@ -77,9 +77,6 @@ export const BookCard = ({
                style={{ maxHeight: '25%', overflow: 'hidden' }}>
             <span className="font-semibold line-clamp-1">{book.title}</span>
             <span className="italic line-clamp-1">by {book.author}</span>
-            {seriesName && (
-              <span className="italic text-gray-300 line-clamp-1">{seriesName} {bookNumber && <span>{bookNumber}</span>}</span>
-            )}
           </div>
         </SmartLink>
       </div>

@@ -130,17 +130,6 @@ export const ReviewDetail = () => {
             <div className="pl-8">
               <div className="mb-1"><span className="font-semibold">Title:</span> {book.title}</div>
               <div className="mb-1"><span className="font-semibold">Author:</span> {book.author}</div>
-              {book.series && (
-                <div className="mb-1 flex items-center">
-                  <span className="font-semibold">Series:</span>
-                  <span
-                    className="ml-1 truncate max-w-[220px] inline-block align-middle"
-                    title={book.series}
-                  >
-                    {book.series}
-                  </span>
-                </div>
-              )}
               {book.genre && <div className="mb-1"><span className="font-semibold">Genre:</span> {book.genre}</div>}
               {book.publish_date && <div className="mb-1"><span className="font-semibold">Published:</span> {formatDate(book.publish_date)}</div>}
               {book.pages && <div className="mb-1"><span className="font-semibold">Pages:</span> {book.pages}</div>}
