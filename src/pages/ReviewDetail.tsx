@@ -181,24 +181,28 @@ export const ReviewDetail = () => {
               <>
                 {book.description.length > 150 && !showFullDescription ? (
                   <>
-                    <p className="line-clamp-5">{book.description}</p>
-                    <button 
-                      onClick={() => setShowFullDescription(true)}
-                      className="text-blue-600 hover:underline text-xs font-medium mt-1 font-sans"
-                    >
-                      View more
-                    </button>
+                    <p className="line-clamp-5 not-italic">{book.description}</p>
+                    <div className="flex justify-center">
+                      <button 
+                        onClick={() => setShowFullDescription(true)}
+                        className="text-blue-600 hover:underline text-xs font-medium mt-1 font-sans"
+                      >
+                        View more
+                      </button>
+                    </div>
                   </>
                 ) : (
                   <>
-                    <p>{book.description}</p>
+                    <p className="not-italic">{book.description}</p>
                     {book.description.length > 150 && (
-                      <button 
-                        onClick={() => setShowFullDescription(false)}
-                        className="text-blue-600 hover:underline text-xs font-medium mt-1 font-sans"
-                      >
-                        View less
-                      </button>
+                      <div className="flex justify-center">
+                        <button 
+                          onClick={() => setShowFullDescription(false)}
+                          className="text-blue-600 hover:underline text-xs font-medium mt-1 font-sans"
+                        >
+                          View less
+                        </button>
+                      </div>
                     )}
                   </>
                 )}
@@ -211,13 +215,13 @@ export const ReviewDetail = () => {
             <span className="flex-shrink mx-3 font-serif italic text-lg text-gray-700 dark:text-gray-200">Review</span>
             <div className="flex-grow border-t border-gray-400 dark:border-gray-600"></div>
           </div>
-          <div className="prose prose-sm dark:prose-invert max-w-none font-serif italic">
-            <p>{book.review}</p>
+          <div className="prose prose-sm dark:prose-invert max-w-none font-serif">
+            <p className="not-italic">{book.review}</p>
           </div>
           {book.review_date && (
             <div className="text-center text-xs text-gray-500 dark:text-maroon-secondary mt-2">Date posted: {formatDate(book.review_date)}</div>
           )}
-          <div className="flex flex-wrap gap-2 mt-2">
+          <div className="flex flex-wrap gap-2 mt-2 justify-center">
             {book.goodreads_link && (
               <SmartLink to={formatExternalLink(book.goodreads_link)} className="px-3 py-1 bg-rose-700 text-white hover:bg-rose-800 dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent rounded-none text-sm font-medium transition-colors">Goodreads</SmartLink>
             )}
@@ -234,7 +238,7 @@ export const ReviewDetail = () => {
           <div className="my-4">
             <div className="border-t border-gray-400 dark:border-gray-600 w-full"></div>
           </div>
-          <div className="mt-2 text-center text-xs text-gray-500 dark:text-maroon-secondary italic">
+          <div className="mb-4 text-center text-xs text-gray-500 dark:text-maroon-secondary italic">
             Thanks to Netgalley & publisher for this ARC in exchange for honest review!
           </div>
         </div>
