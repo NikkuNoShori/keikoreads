@@ -33,7 +33,12 @@ export const Reviews = () => {
     currentPage,
     setCurrentPage,
     pageSize,
+    setPageSize,
   } = useBooks(sortField, sortDirection, { searchTerm });
+  
+  // Add state for results per page dropdown
+  const resultsPerPageOptions = [9, 28, 54, 96, 'All'];
+  const [resultsPerPage, setResultsPerPage] = useState<number | 'All'>(pageSize);
   
   // Debug log to see what's happening
   useEffect(() => {
@@ -181,31 +186,27 @@ export const Reviews = () => {
   // Calculate total pages
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  // Pagination controls
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
+  // Handle results per page change
+  const handleResultsPerPageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    let newSize: number | 'All';
+    if (value === 'All') {
+      newSize = 'All';
+      setPageSize(totalCount > 0 ? totalCount : 10000); // fallback large number if totalCount is 0
+      fetchBooks(sortField, sortDirection, { searchTerm }, 1, totalCount > 0 ? totalCount : 10000);
+    } else {
+      newSize = parseInt(value, 10);
+      setPageSize(newSize);
+      fetchBooks(sortField, sortDirection, { searchTerm }, 1, newSize);
+    }
+    setResultsPerPage(newSize);
+    setCurrentPage(1);
+  };
 
-    return (
-      <div className="flex justify-center items-center mt-8 space-x-2">
-        <button
-          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-          disabled={currentPage === 1}
-          className="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 disabled:opacity-50"
-        >
-          Previous
-        </button>
-        <span className="text-gray-700 dark:text-gray-300">
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-          disabled={currentPage === totalPages}
-          className="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 disabled:opacity-50"
-        >
-          Next
-        </button>
-      </div>
-    );
+  // Helper to handle page change and fetch books
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    fetchBooks(sortField, sortDirection, { searchTerm }, newPage, pageSize);
   };
 
   return (
@@ -389,7 +390,57 @@ export const Reviews = () => {
               />
             ))}
           </div>
-          {renderPagination()}
+          {/* Unified, centered pagination and results-per-page control */}
+          <div className="flex flex-col items-center mt-8">
+            <div className="flex items-center space-x-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2 shadow-sm">
+              {/* Previous button */}
+              {resultsPerPage !== 'All' && (
+                <button
+                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="px-1.5 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 transition hover:bg-rose-100 dark:hover:bg-maroon-accent focus:ring-2 focus:ring-rose-300 dark:focus:ring-maroon-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  aria-label="Previous page"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                  </svg>
+                </button>
+              )}
+              {/* Results per page dropdown */}
+              <select
+                id="results-per-page"
+                value={resultsPerPage}
+                onChange={handleResultsPerPageChange}
+                className="text-xs px-2 py-1 bg-white text-gray-800 border-none focus:ring-2 focus:ring-rose-300 dark:focus:ring-maroon-accent rounded-full cursor-pointer outline-none transition"
+                style={{ colorScheme: 'light' }}
+              >
+                {resultsPerPageOptions.map((option) => (
+                  <option key={option} value={option}>{option === 'All' ? 'All' : option}</option>
+                ))}
+              </select>
+              {/* Next button */}
+              {resultsPerPage !== 'All' && (
+                <button
+                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-1.5 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 transition hover:bg-rose-100 dark:hover:bg-maroon-accent focus:ring-2 focus:ring-rose-300 dark:focus:ring-maroon-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  aria-label="Next page"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                  </svg>
+                </button>
+              )}
+            </div>
+            {/* Page indicator below pagination */}
+            {resultsPerPage !== 'All' && (
+              <div className="w-full flex justify-center mt-1">
+                <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">
+                  Page {currentPage} of {totalPages}
+                </span>
+              </div>
+            )}
+          </div>
         </>
       )}
 
