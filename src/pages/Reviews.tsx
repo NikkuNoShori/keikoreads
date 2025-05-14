@@ -295,22 +295,22 @@ export const Reviews = () => {
       {/* Search and Filters */}
       <div className="mb-6 flex flex-col md:flex-row items-stretch md:items-center gap-4">
         <form onSubmit={handleSearch} className="flex-grow relative">
-          <div className="flex items-center relative rounded-md border border-gray-300 dark:border-gray-600 overflow-hidden shadow-sm focus-within:ring-1 focus-within:ring-rose-500 dark:focus-within:ring-maroon-card transition-shadow">
-            <div className="pl-3 text-gray-400 dark:text-gray-500">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+          <div className="flex items-center relative rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm focus-within:ring-2 focus-within:ring-rose-300 dark:focus-within:ring-maroon-accent transition min-h-[44px]">
+            <span className="pl-2 text-gray-400 dark:text-gray-500 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 19l-4-4m0 0A7 7 0 1 0 5 5a7 7 0 0 0 10 10z" />
               </svg>
-            </div>
+            </span>
             <input
               type="text"
               placeholder="Search by title, author, or description"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-grow px-3 py-2 border-0 focus:ring-0 focus:outline-none bg-white dark:bg-transparent dark:text-white"
+              className="flex-grow text-sm px-3 py-2 bg-transparent border-0 focus:ring-0 focus:outline-none dark:text-white rounded-full"
             />
             <button
               type="submit"
-              className="px-4 py-2 bg-rose-600 text-white h-full hover:bg-rose-700 dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent"
+              className="text-sm rounded-full px-4 py-2 bg-rose-600 text-white hover:bg-rose-700 dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent focus:ring-2 focus:ring-rose-300 dark:focus:ring-maroon-accent transition ml-2 mr-2"
             >
               Search
             </button>
@@ -322,10 +322,13 @@ export const Reviews = () => {
               id="sort"
               value={`${sortField}-${sortDirection}`}
               onChange={handleSortChange}
-              className="appearance-none pl-8 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-800 shadow-sm cursor-pointer"
+              className="text-sm rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 pr-6 py-2 focus:ring-2 focus:ring-rose-300 dark:focus:ring-maroon-accent transition cursor-pointer outline-none shadow-sm min-h-[44px] w-auto max-w-xs"
+              style={{ WebkitAppearance: 'none', MozAppearance: 'none', appearance: 'none' }}
             >
               <option value="created_at-desc">Newest First</option>
               <option value="created_at-asc">Oldest First</option>
+              <option value="publish_date-desc">Publication Date (Newest First)</option>
+              <option value="publish_date-asc">Publication Date (Oldest First)</option>
               <option value="title-asc">Title (A-Z)</option>
               <option value="title-desc">Title (Z-A)</option>
               <option value="author-asc">Author (A-Z)</option>
@@ -333,11 +336,6 @@ export const Reviews = () => {
               <option value="rating-desc">Highest Rated</option>
               <option value="rating-asc">Lowest Rated</option>
             </select>
-            <div className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" />
-              </svg>
-            </div>
             <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                 <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />

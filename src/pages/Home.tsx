@@ -74,7 +74,9 @@ export const Home = () => {
                 })
                 .slice(0, 3)
                 .map((book) => (
-                  <BookCard key={book.id} book={book} />
+                  <div key={book.id} className="w-[85%] max-w-[250px] mx-auto">
+                    <BookCard book={book} />
+                  </div>
                 ))}
             </div>
           )}
