@@ -19,6 +19,7 @@ export interface Book {
   created_at?: string;
   updated_at?: string;
   slug?: string; // URL-friendly version of the title
+  deleted_at?: string;
 }
 
 export interface NewBook extends Omit<Book, 'id' | 'created_at' | 'updated_at'> {

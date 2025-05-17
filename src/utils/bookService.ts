@@ -145,8 +145,19 @@ export const createBook = async (book: NewBook): Promise<{ data: Book | null; er
 // Update an existing book
 export const updateBook = async (id: string, book: NewBook): Promise<{ data: Book | null; error: Error | null }> => {
   try {
-    // Generate new slug if title has changed
-    const slug = book.title ? generateSlug(book.title) : undefined;
+    let title = book.title;
+    // If title is not provided, fetch the current book to get the title
+    if (!title) {
+      const { data: currentBook, error: fetchError } = await supabase
+        .from('books')
+        .select('title')
+        .eq('id', id)
+        .single();
+      if (fetchError) throw fetchError;
+      title = currentBook?.title;
+    }
+    // Only generate slug if title is available
+    const slug = title ? generateSlug(title) : undefined;
 
     const { data, error } = await supabase
       .from('books')

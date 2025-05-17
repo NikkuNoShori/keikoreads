@@ -1,5 +1,3 @@
-import React from 'react';
-
 // NOTE: To see these fonts, add the following to your index.html <head>:
 // <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Great+Vibes&family=Allura&family=Parisienne&family=Dancing+Script&display=swap" rel="stylesheet">
 

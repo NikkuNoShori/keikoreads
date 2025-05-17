@@ -230,6 +230,7 @@ export const Reviews = () => {
       await fetchBooks(sortField, sortDirection, searchTerm ? { searchTerm } : {}, currentPage, pageSize);
       setSelectMode(false);
       setSelectedBooks(new Set());
+      setShowBatchDeleteConfirm(false);
       window.dispatchEvent(new Event('refreshRecyclingBin'));
       console.log('Soft delete complete, books refreshed.');
     } catch (error) {

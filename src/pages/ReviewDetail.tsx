@@ -138,13 +138,25 @@ export const ReviewDetail = () => {
           <div className="w-full mt-4">
             <div className="font-serif italic text-lg font-bold mb-1 pl-4 border-l-4 border-rose-200 dark:border-maroon-accent">Rating:</div>
             <div className="flex items-center pl-8">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <span key={i} className={
-                  i < book.rating
-                    ? 'text-black dark:text-white text-xl'
-                    : 'text-gray-300 dark:text-gray-500 text-xl'
-                }>★</span>
-              ))}
+              {Array.from({ length: 5 }).map((_, i) => {
+                const starNum = i + 1;
+                if (book.rating >= starNum) {
+                  return <span key={i} className="text-black dark:text-white text-xl">★</span>;
+                } else if (book.rating >= starNum - 0.5) {
+                  return (
+                    <span key={i} className="text-black dark:text-white text-xl">
+                      <svg width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" className="inline-block align-middle">
+                        <defs>
+                          <linearGradient id={`half-grad-detail-${i}`}> <stop offset="50%" stopColor="currentColor"/> <stop offset="50%" stopColor="transparent"/> </linearGradient>
+                        </defs>
+                        <path d="M10 15l-5.878 3.09 1.122-6.545L.488 6.91l6.561-.955L10 0l2.951 5.955 6.561.955-4.756 4.635 1.122 6.545z" fill={`url(#half-grad-detail-${i})`} stroke="currentColor" strokeWidth="1"/>
+                      </svg>
+                    </span>
+                  );
+                } else {
+                  return <span key={i} className="text-gray-300 dark:text-gray-500 text-xl">★</span>;
+                }
+              })}
               <span className="ml-2 text-base">({book.rating}/5)</span>
             </div>
           </div>
@@ -173,7 +185,7 @@ export const ReviewDetail = () => {
           {/* Description Divider */}
           <div className="relative flex items-center py-2">
             <div className="flex-grow border-t border-gray-400 dark:border-gray-600"></div>
-            <span className="flex-shrink mx-3 font-serif italic text-lg text-gray-700 dark:text-gray-200">Description</span>
+            <span className="flex-shrink font-serif italic text-lg font-bold text-gray-700 dark:text-gray-200">Description</span>
             <div className="flex-grow border-t border-gray-400 dark:border-gray-600"></div>
           </div>
           <div className="prose prose-sm dark:prose-invert max-w-none font-serif leading-relaxed">
@@ -212,7 +224,7 @@ export const ReviewDetail = () => {
           {/* Review Divider */}
           <div className="relative flex items-center py-2">
             <div className="flex-grow border-t border-gray-400 dark:border-gray-600"></div>
-            <span className="flex-shrink mx-3 font-serif italic text-lg text-gray-700 dark:text-gray-200">Review</span>
+            <span className="flex-shrink font-serif italic text-lg font-bold text-gray-700 dark:text-gray-200">Review</span>
             <div className="flex-grow border-t border-gray-400 dark:border-gray-600"></div>
           </div>
           <div className="prose prose-sm dark:prose-invert max-w-none font-serif">

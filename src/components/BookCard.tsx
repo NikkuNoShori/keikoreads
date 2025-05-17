@@ -26,14 +26,29 @@ export const BookCard = ({
   const renderStars = (rating: number) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <span 
-          key={i} 
-          className={`${i <= rating ? 'text-yellow-500' : 'text-gray-300'} text-sm`}
-        >
-          ★
-        </span>
-      );
+      if (rating >= i) {
+        // Full star
+        stars.push(
+          <span key={i} className="text-yellow-500 text-sm">★</span>
+        );
+      } else if (rating >= i - 0.5) {
+        // Half star (SVG)
+        stars.push(
+          <span key={i} className="text-yellow-500 text-sm">
+            <svg width="1em" height="1em" viewBox="0 0 20 20" fill="currentColor" className="inline-block align-middle">
+              <defs>
+                <linearGradient id={`half-grad-${i}`}> <stop offset="50%" stopColor="currentColor"/> <stop offset="50%" stopColor="transparent"/> </linearGradient>
+              </defs>
+              <path d="M10 15l-5.878 3.09 1.122-6.545L.488 6.91l6.561-.955L10 0l2.951 5.955 6.561.955-4.756 4.635 1.122 6.545z" fill={`url(#half-grad-${i})`} stroke="currentColor" strokeWidth="1"/>
+            </svg>
+          </span>
+        );
+      } else {
+        // Empty star
+        stars.push(
+          <span key={i} className="text-gray-300 text-sm">★</span>
+        );
+      }
     }
     return stars;
   };
@@ -72,18 +87,33 @@ export const BookCard = ({
             </span>
           </div>
         )}
-        <SmartLink to={`/reviews/${book.slug}`} className="block w-full h-full pointer-events-none">
-          <img
-            src={book.cover_image ? book.cover_image : undefined}
-            alt={`Cover for ${book.title}`}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute bottom-0 left-0 right-0 bg-gray-900/80 text-white px-2 py-1 text-xs flex flex-col justify-end z-10"
-               style={{ maxHeight: '25%', overflow: 'hidden' }}>
-            <span className="font-semibold line-clamp-1">{book.title}</span>
-            <span className="italic line-clamp-1">by {book.author}</span>
-          </div>
-        </SmartLink>
+        {selectMode ? (
+          <>
+            <img
+              src={book.cover_image ? book.cover_image : undefined}
+              alt={`Cover for ${book.title}`}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute bottom-0 left-0 right-0 bg-gray-900/80 text-white px-2 py-1 text-xs flex flex-col justify-end z-10"
+                 style={{ maxHeight: '25%', overflow: 'hidden' }}>
+              <span className="font-semibold line-clamp-1">{book.title}</span>
+              <span className="italic line-clamp-1">by {book.author}</span>
+            </div>
+          </>
+        ) : (
+          <SmartLink to={`/reviews/${book.slug}`} className="block w-full h-full">
+            <img
+              src={book.cover_image ? book.cover_image : undefined}
+              alt={`Cover for ${book.title}`}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute bottom-0 left-0 right-0 bg-gray-900/80 text-white px-2 py-1 text-xs flex flex-col justify-end z-10"
+                 style={{ maxHeight: '25%', overflow: 'hidden' }}>
+              <span className="font-semibold line-clamp-1">{book.title}</span>
+              <span className="italic line-clamp-1">by {book.author}</span>
+            </div>
+          </SmartLink>
+        )}
         {selectMode && selected && (
           <div className="absolute inset-0 bg-rose-400/20 dark:bg-maroon-accent/30 pointer-events-none transition-all duration-200" />
         )}

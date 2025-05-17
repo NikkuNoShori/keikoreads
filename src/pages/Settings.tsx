@@ -44,7 +44,7 @@ export const Settings = () => {
   // Fetch deleted books for Recycling Bin
   const fetchRecyclingBooks = () => {
     setRecyclingLoading(true);
-    getBooks('deleted_at', 'desc', { deleted: true }, 1, 50)
+    getBooks('review_date', 'desc', { deleted: true }, 1, 50)
       .then(({ data, error }) => {
         if (error) setRecyclingError(error.message);
         else setRecyclingBooks(data || []);
@@ -71,7 +71,7 @@ export const Settings = () => {
   const handleRestore = async (bookId: string) => {
     setRecyclingLoading(true);
     setRecyclingError(null);
-    const { data, error } = await updateBook(bookId, { deleted: false } as any);
+    const { error } = await updateBook(bookId, { deleted: false } as any);
     if (error) {
       setRecyclingError(error.message);
     } else {
