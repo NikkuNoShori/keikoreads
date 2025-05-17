@@ -304,11 +304,15 @@ export const Reviews = () => {
             <input
               ref={inputRef}
               type="text"
-              placeholder="Search by title, author, or description"
+              placeholder="Search by title, author, review date, or release date"
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
                 setShowSuggestions(true);
+                if (e.target.value === '') {
+                  fetchBooks(sortField, sortDirection, {}, 1, pageSize);
+                  setCurrentPage(1);
+                }
               }}
               onFocus={() => setShowSuggestions(true)}
               onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
@@ -409,7 +413,11 @@ export const Reviews = () => {
 
       {!loading && !error && books.length === 0 && (
         <div className="text-center py-8">
-          <p className="text-gray-600 dark:text-gray-400 mb-4">No reviews found.</p>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            {searchTerm
+              ? 'No reviews found for your search.'
+              : 'No reviews found.'}
+          </p>
           {isAuthenticated && (
             <button
               onClick={() => {

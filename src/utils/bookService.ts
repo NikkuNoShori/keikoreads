@@ -28,7 +28,7 @@ export const getBooks = async (
         query = query.eq('rating', filters.rating);
       }
       if (filters.searchTerm) {
-        query = query.or(`title.ilike.%${filters.searchTerm}%,author.ilike.%${filters.searchTerm}%,description.ilike.%${filters.searchTerm}%`);
+        query = query.or(`title.ilike.%${filters.searchTerm}%,author.ilike.%${filters.searchTerm}%,review_date.ilike.%${filters.searchTerm}%,publish_date.ilike.%${filters.searchTerm}%`);
       }
       if (typeof filters.deleted === 'boolean') {
         query = query.eq('deleted', filters.deleted);

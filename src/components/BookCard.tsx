@@ -57,8 +57,8 @@ export const BookCard = ({
             <AuthorizedAction>
               <BookMenu 
                 book={book} 
-                onEdit={onEdit}
-                onDelete={onDelete}
+                onEdit={onEdit ? onEdit : () => {}}
+                onDelete={onDelete ? onDelete : () => {}}
               />
             </AuthorizedAction>
           </div>
@@ -74,7 +74,7 @@ export const BookCard = ({
         )}
         <SmartLink to={`/reviews/${book.slug}`} className="block w-full h-full pointer-events-none">
           <img
-            src={book.cover_image || ''}
+            src={book.cover_image ? book.cover_image : undefined}
             alt={`Cover for ${book.title}`}
             className="w-full h-full object-cover"
           />
@@ -93,7 +93,7 @@ export const BookCard = ({
         <span className="ml-1 text-xs text-gray-500 dark:text-maroon-secondary">({book.rating})</span>
       </div>
       {book.review_date && (
-        <p className="text-[10px] text-gray-400 dark:text-maroon-secondary mb-2">Reviewed: {formatDate(book.review_date)}</p>
+        <p className="text-[10px] text-gray-400 dark:text-maroon-secondary mb-2 text-center">Reviewed: {formatDate(book.review_date)}</p>
       )}
     </div>
   );
