@@ -3,6 +3,9 @@ import { useAuthContext } from '../context/AuthContext';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { supabase } from '../utils/supabaseClient';
 import { DatePicker } from '../components/DatePicker';
+import { getBooks, updateBook } from '../utils/bookService';
+import { Book } from '../types/BookTypes';
+import { FiRefreshCw } from 'react-icons/fi';
 
 interface ValidationErrors {
   first_name?: string;
@@ -19,6 +22,9 @@ export const Settings = () => {
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
+  const [recyclingBooks, setRecyclingBooks] = useState<Book[]>([]);
+  const [recyclingLoading, setRecyclingLoading] = useState(false);
+  const [recyclingError, setRecyclingError] = useState<string | null>(null);
 
   useEffect(() => {
     if (profile?.date_of_birth) {
@@ -34,6 +40,45 @@ export const Settings = () => {
       return () => clearTimeout(timer);
     }
   }, [updateSuccess]);
+
+  // Fetch deleted books for Recycling Bin
+  const fetchRecyclingBooks = () => {
+    setRecyclingLoading(true);
+    getBooks('deleted_at', 'desc', { deleted: true }, 1, 50)
+      .then(({ data, error }) => {
+        if (error) setRecyclingError(error.message);
+        else setRecyclingBooks(data || []);
+      })
+      .finally(() => setRecyclingLoading(false));
+  };
+
+  useEffect(() => {
+    if (activeTab === 'recycling') {
+      fetchRecyclingBooks();
+    }
+  }, [activeTab]);
+
+  // Listen for refreshRecyclingBin event
+  useEffect(() => {
+    const handler = () => {
+      if (activeTab === 'recycling') fetchRecyclingBooks();
+    };
+    window.addEventListener('refreshRecyclingBin', handler);
+    return () => window.removeEventListener('refreshRecyclingBin', handler);
+  }, [activeTab]);
+
+  // Restore book handler
+  const handleRestore = async (bookId: string) => {
+    setRecyclingLoading(true);
+    setRecyclingError(null);
+    const { data, error } = await updateBook(bookId, { deleted: false } as any);
+    if (error) {
+      setRecyclingError(error.message);
+    } else {
+      setRecyclingBooks(prev => prev.filter(b => b.id !== bookId));
+    }
+    setRecyclingLoading(false);
+  };
 
   // Input validation
   const validateInput = (name: string, value: string): string | undefined => {
@@ -180,7 +225,7 @@ export const Settings = () => {
   return (
     <ProtectedRoute requireAuth={true}>
       <div className="w-full">
-        <h1 className="text-3xl font-bold mb-8">Account Settings</h1>
+        <h1 className="text-5xl text-center mb-8" style={{ fontFamily: "'Allura', cursive", fontWeight: 'normal' }}>Account Settings</h1>
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sidebar */}
           <div className="w-full md:w-64 flex-shrink-0">
@@ -207,14 +252,14 @@ export const Settings = () => {
                   Account
                 </button>
                 <button
-                  onClick={() => setActiveTab('trash')}
+                  onClick={() => setActiveTab('recycling')}
                   className={`text-left px-4 py-2 rounded-md ${
-                    activeTab === 'trash'
+                    activeTab === 'recycling'
                       ? 'bg-rose-100 text-rose-700 dark:bg-gray-700 dark:text-rose-400'
                       : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
                   }`}
                 >
-                  Trash Bin
+                  Recycling Bin
                 </button>
               </div>
             </div>
@@ -352,11 +397,58 @@ export const Settings = () => {
                   </div>
                 </div>
               )}
-              {activeTab === 'trash' && (
+              {activeTab === 'recycling' && (
                 <div>
-                  <h2 className="text-xl font-semibold mb-6">Trash Bin</h2>
-                  {/* Trash Bin Table will be implemented here */}
-                  <div id="trash-bin-table-placeholder" className="text-gray-500 dark:text-gray-400">Loading deleted books...</div>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-semibold">Recycling Bin</h2>
+                    <button
+                      onClick={fetchRecyclingBooks}
+                      className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                      aria-label="Refresh"
+                      title="Refresh"
+                      disabled={recyclingLoading}
+                    >
+                      <FiRefreshCw className={`w-5 h-5 ${recyclingLoading ? 'animate-spin' : ''}`} />
+                    </button>
+                  </div>
+                  {recyclingLoading ? (
+                    <div className="text-gray-500 dark:text-gray-400">Loading deleted books...</div>
+                  ) : recyclingError ? (
+                    <div className="text-red-500 dark:text-red-400">{recyclingError}</div>
+                  ) : recyclingBooks.length === 0 ? (
+                    <div className="text-gray-500 dark:text-gray-400">No deleted books found.</div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead>
+                          <tr>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Title</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Author</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Deleted At</th>
+                            <th className="px-4 py-2"></th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                          {recyclingBooks.map(book => (
+                            <tr key={book.id}>
+                              <td className="px-4 py-2 whitespace-nowrap">{book.title}</td>
+                              <td className="px-4 py-2 whitespace-nowrap">{book.author}</td>
+                              <td className="px-4 py-2 whitespace-nowrap">{book.deleted_at ? new Date(book.deleted_at).toLocaleString() : ''}</td>
+                              <td className="px-4 py-2 whitespace-nowrap">
+                                <button
+                                  className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                                  onClick={() => handleRestore(book.id)}
+                                  disabled={recyclingLoading}
+                                >
+                                  Restore
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

@@ -22,6 +22,8 @@ export const Reviews = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [deleteMode, setDeleteMode] = useState<'single' | 'batch'>('batch');
+  const [singleDeleteBookId, setSingleDeleteBookId] = useState<string | null>(null);
   
   const { isAuthenticated } = useAuthContext();
   
@@ -67,34 +69,6 @@ export const Reviews = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
-  // Handle batch delete
-  const handleBatchDelete = async () => {
-    if (selectedBooks.size === 0) return;
-    
-    try {
-      const bookIds = Array.from(selectedBooks);
-      
-      // Delete each book one by one
-      for (const id of bookIds) {
-        const { error } = await supabase
-          .from('books')
-          .delete()
-          .eq('id', id);
-          
-        if (error) throw error;
-      }
-      
-      // Refresh the books list
-      fetchBooks();
-      setSelectMode(false);
-      setSelectedBooks(new Set());
-      setShowBatchDeleteConfirm(false);
-    } catch (error) {
-      console.error('Error deleting reviews:', error);
-      alert('Error deleting reviews');
-    }
-  };
-  
   // Handle sort changes
   const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
@@ -103,13 +77,13 @@ export const Reviews = () => {
     setSortField(field);
     setSortDirection(direction);
     // Fetch books with new sort parameters
-    fetchBooks(field, direction, { searchTerm }, currentPage, pageSize);
+    fetchBooks(field, direction, searchTerm ? { searchTerm } : {}, currentPage, pageSize);
   };
 
   // Handle search
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
-    fetchBooks(sortField, sortDirection, { searchTerm }, 1, pageSize);
+    fetchBooks(sortField, sortDirection, searchTerm ? { searchTerm } : {}, 1, pageSize);
     // Reset to first page when searching
     setCurrentPage(1);
   };
@@ -118,7 +92,7 @@ export const Reviews = () => {
   const handleSuggestionClick = (suggestion: string) => {
     setSearchTerm(suggestion);
     setShowSuggestions(false);
-    fetchBooks(sortField, sortDirection, { searchTerm: suggestion }, 1, pageSize);
+    fetchBooks(sortField, sortDirection, suggestion ? { searchTerm: suggestion } : {}, 1, pageSize);
     setCurrentPage(1);
     if (inputRef.current) inputRef.current.blur();
   };
@@ -130,10 +104,17 @@ export const Reviews = () => {
     setShowModal(true);
   };
 
-  // Handle delete book
+  // Handle delete book (single)
   const handleDelete = (book: Book) => {
     console.log('Deleting book:', book.title);
-    setSelectedBooks(new Set([book.id]));
+    setDeleteMode('single');
+    setSingleDeleteBookId(book.id);
+    setShowBatchDeleteConfirm(true);
+  };
+
+  // Handle batch delete (multi-select)
+  const handleBatchDeleteClick = () => {
+    setDeleteMode('batch');
     setShowBatchDeleteConfirm(true);
   };
 
@@ -170,7 +151,7 @@ export const Reviews = () => {
         currentPage,
         pageSize
       });
-      await fetchBooks(sortField, sortDirection, { searchTerm }, 1, pageSize);
+      await fetchBooks(sortField, sortDirection, searchTerm ? { searchTerm } : {}, 1, pageSize);
       setShowModal(false);
       setEditingBook(null);
     } catch (err) {
@@ -198,11 +179,11 @@ export const Reviews = () => {
     if (value === 'All') {
       newSize = 'All';
       setPageSize(totalCount > 0 ? totalCount : 10000); // fallback large number if totalCount is 0
-      fetchBooks(sortField, sortDirection, { searchTerm }, 1, totalCount > 0 ? totalCount : 10000);
+      fetchBooks(sortField, sortDirection, searchTerm ? { searchTerm } : {}, 1, totalCount > 0 ? totalCount : 10000);
     } else {
       newSize = parseInt(value, 10);
       setPageSize(newSize);
-      fetchBooks(sortField, sortDirection, { searchTerm }, 1, newSize);
+      fetchBooks(sortField, sortDirection, searchTerm ? { searchTerm } : {}, 1, newSize);
     }
     setResultsPerPage(newSize);
     setCurrentPage(1);
@@ -211,7 +192,7 @@ export const Reviews = () => {
   // Helper to handle page change and fetch books
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
-    fetchBooks(sortField, sortDirection, { searchTerm }, newPage, pageSize);
+    fetchBooks(sortField, sortDirection, searchTerm ? { searchTerm } : {}, newPage, pageSize);
   };
 
   // Handle book card click in select mode
@@ -246,13 +227,35 @@ export const Reviews = () => {
         console.log('Soft delete response for', id, error);
         if (error) throw error;
       }
-      await fetchBooks(sortField, sortDirection, { searchTerm }, currentPage, pageSize);
+      await fetchBooks(sortField, sortDirection, searchTerm ? { searchTerm } : {}, currentPage, pageSize);
       setSelectMode(false);
       setSelectedBooks(new Set());
+      window.dispatchEvent(new Event('refreshRecyclingBin'));
       console.log('Soft delete complete, books refreshed.');
     } catch (error) {
       console.error('Error moving reviews to trash:', error);
       alert('Error moving reviews to trash');
+    }
+  };
+
+  // Single soft delete handler
+  const handleSingleSoftDelete = async () => {
+    if (!singleDeleteBookId) return;
+    try {
+      const now = new Date().toISOString();
+      const { error } = await supabase
+        .from('books')
+        .update({ deleted: true, deleted_at: now })
+        .eq('id', singleDeleteBookId);
+      if (error) throw error;
+      await fetchBooks(sortField, sortDirection, searchTerm ? { searchTerm } : {}, currentPage, pageSize);
+      setSingleDeleteBookId(null);
+      setShowBatchDeleteConfirm(false);
+      window.dispatchEvent(new Event('refreshRecyclingBin'));
+      console.log('Single soft delete complete, book refreshed.');
+    } catch (error) {
+      console.error('Error moving review to trash:', error);
+      alert('Error moving review to trash');
     }
   };
 
@@ -364,7 +367,7 @@ export const Reviews = () => {
             <button
               onClick={e => {
                 e.stopPropagation();
-                handleBatchSoftDelete();
+                handleBatchDeleteClick();
               }}
               className="p-2 rounded-full transition-colors bg-red-100 dark:bg-red-700 hover:bg-red-200 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-300 dark:focus:ring-red-800"
               aria-label="Move to Trash"
@@ -499,18 +502,22 @@ export const Reviews = () => {
           <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg max-w-md w-full p-6 relative">
             <h3 className="text-lg font-semibold mb-2">Confirm Delete</h3>
             <p className="mb-4">
-              Are you sure you want to delete {selectedBooks.size} {selectedBooks.size === 1 ? 'review' : 'reviews'}? 
-              This action cannot be undone.
+              {deleteMode === 'single'
+                ? 'Are you sure you want to delete this review? This action cannot be undone.'
+                : `Are you sure you want to delete ${selectedBooks.size} ${selectedBooks.size === 1 ? 'review' : 'reviews'}? This action cannot be undone.`}
             </p>
             <div className="flex justify-end space-x-3">
               <button
-                onClick={() => setShowBatchDeleteConfirm(false)}
+                onClick={() => {
+                  setShowBatchDeleteConfirm(false);
+                  setSingleDeleteBookId(null);
+                }}
                 className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 Cancel
               </button>
               <button
-                onClick={handleBatchDelete}
+                onClick={deleteMode === 'single' ? handleSingleSoftDelete : handleBatchSoftDelete}
                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
               >
                 Delete
