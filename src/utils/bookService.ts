@@ -10,6 +10,7 @@ export const getBooks = async (
   pageSize = 10
 ): Promise<{ data: Book[] | null; count: number | null; error: Error | null }> => {
   try {
+    console.log('[bookService] getBooks called with:', { sortField, sortDirection, filters, page, pageSize });
     // Start building the query
     let query = supabase
       .from('books')
@@ -29,9 +30,36 @@ export const getBooks = async (
       if (filters.searchTerm) {
         query = query.or(`title.ilike.%${filters.searchTerm}%,author.ilike.%${filters.searchTerm}%,description.ilike.%${filters.searchTerm}%`);
       }
+      if (typeof filters.deleted === 'boolean') {
+        query = query.eq('deleted', filters.deleted);
+      }
     }
 
-    // Apply sorting
+    // If sorting by review_date, fetch all, sort in JS, then paginate
+    if (sortField === 'review_date') {
+      // Remove pagination for now, will apply after sorting
+      const { data, error, count } = await query;
+      console.log('[bookService] Supabase response (review_date):', { data, error, count });
+      if (error) return { data: null, count: null, error: new Error(error.message) };
+      if (!data) return { data: [], count: 0, error: null };
+      // Sort by year, then month, then day
+      const sorted = data.sort((a, b) => {
+        if (!a.review_date && !b.review_date) return 0;
+        if (!a.review_date) return sortDirection === 'asc' ? -1 : 1;
+        if (!b.review_date) return sortDirection === 'asc' ? 1 : -1;
+        const [aYear, aMonth, aDay] = a.review_date.split('-').map(Number);
+        const [bYear, bMonth, bDay] = b.review_date.split('-').map(Number);
+        if (aYear !== bYear) return sortDirection === 'asc' ? aYear - bYear : bYear - aYear;
+        if (aMonth !== bMonth) return sortDirection === 'asc' ? aMonth - bMonth : bMonth - aMonth;
+        return sortDirection === 'asc' ? aDay - bDay : bDay - aDay;
+      });
+      // Paginate
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize;
+      return { data: sorted.slice(from, to), count: count || sorted.length, error: null };
+    }
+
+    // Apply sorting for other fields
     query = query.order(sortField, { ascending: sortDirection === 'asc' });
 
     // Apply pagination
@@ -41,6 +69,7 @@ export const getBooks = async (
 
     // Execute the query
     const { data, error, count } = await query;
+    console.log('[bookService] Supabase response:', { data, error, count });
 
     return { data, count, error: error ? new Error(error.message) : null };
   } catch (error) {
@@ -86,9 +115,17 @@ export const createBook = async (book: NewBook): Promise<{ data: Book | null; er
     // Generate slug from title
     const slug = generateSlug(book.title);
 
+    // Convert empty date strings to null
+    const cleanBook = {
+      ...book,
+      publish_date: book.publish_date ? book.publish_date : null,
+      review_date: book.review_date ? book.review_date : null,
+      deleted: false, // Always set to false for new books
+    };
+
     const { data, error } = await supabase
       .from('books')
-      .insert({ ...book, slug })
+      .insert({ ...cleanBook, slug })
       .select()
       .single();
 

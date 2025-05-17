@@ -26,5 +26,6 @@ export const useAuthContext = (): AuthContextType => {
   if (context === undefined) {
     throw new Error('useAuthContext must be used within an AuthProvider');
   }
+  
   return context;
 }; 

@@ -1,27 +1,29 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { BookCard } from "../components/BookCard";
 import { useBooks } from "../hooks/useBooks";
-import { BookSortField, SortDirection, NewBook, Book } from "../types/BookTypes";
+import { BookSortField, SortDirection, Book, NewBook } from "../types/BookTypes";
+import { FiEdit2, FiPlusCircle, FiX } from 'react-icons/fi';
+import { useAuthContext } from '../context/AuthContext';
+import { supabase } from '../utils/supabaseClient';
+import { Modal } from "../components/Modal";
 import { BookForm } from "../components/BookForm";
-import { createBook, updateBook, deleteBook } from "../utils/bookService";
-import { useNavigate } from 'react-router-dom';
-import { AuthorizedAction } from "../components/AuthorizedAction";
-import { supabase } from "../utils/supabaseClient";
+import { createBook, updateBook } from "../utils/bookService";
+import { AuthorizedAction } from '../components/AuthorizedAction';
 
 export const Reviews = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [bookToDelete, setBookToDelete] = useState<Book | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<BookSortField>('created_at');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [selectMode, setSelectMode] = useState(false);
   const [selectedBooks, setSelectedBooks] = useState<Set<string>>(new Set());
   const [showBatchDeleteConfirm, setShowBatchDeleteConfirm] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   
-  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthContext();
   
   // Get books using our custom hook
   const {
@@ -40,6 +42,15 @@ export const Reviews = () => {
   const resultsPerPageOptions = [9, 28, 54, 96, 'All'];
   const [resultsPerPage, setResultsPerPage] = useState<number | 'All'>(pageSize);
   
+  // Filtered suggestions based on searchTerm
+  const suggestions = searchTerm.length > 0
+    ? books.filter(
+        (book) =>
+          book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (book.author && book.author.toLowerCase().includes(searchTerm.toLowerCase()))
+      )
+    : [];
+  
   // Debug log to see what's happening
   useEffect(() => {
     console.log("Books status:", { 
@@ -56,20 +67,8 @@ export const Reviews = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
-  // Toggle select mode
-  const toggleSelectMode = () => {
-    setSelectMode(!selectMode);
-    setSelectedBooks(new Set());
-  };
-  
   // Handle batch delete
-  const handleBatchDelete = () => {
-    if (selectedBooks.size === 0) return;
-    setShowBatchDeleteConfirm(true);
-  };
-  
-  // Confirm batch delete
-  const confirmBatchDelete = async () => {
+  const handleBatchDelete = async () => {
     if (selectedBooks.size === 0) return;
     
     try {
@@ -115,63 +114,70 @@ export const Reviews = () => {
     setCurrentPage(1);
   };
 
-  // Handle new review submit
-  const handleBookSubmit = async (bookData: NewBook) => {
-    setIsSubmitting(true);
-    try {
-      if (editingBook) {
-        // Update existing book
-        const { data, error } = await updateBook(editingBook.id, bookData);
-        if (!error && data) {
-          await fetchBooks();
-          closeModal();
-          // If we're on the review page, navigate to refresh the data
-          if (window.location.pathname === `/reviews/${data.slug}`) {
-            navigate(`/reviews/${data.slug}`);
-          }
-        } else {
-          alert(error?.message || 'Error updating review');
-        }
-      } else {
-        // Create new book
-        const { data, error } = await createBook(bookData);
-        if (!error && data) {
-          await fetchBooks();
-          closeModal();
-          // Redirect to the new review detail page
-          navigate(`/reviews/${data.slug}`);
-        } else {
-          alert(error?.message || 'Error creating review');
-        }
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+  // Handle suggestion click
+  const handleSuggestionClick = (suggestion: string) => {
+    setSearchTerm(suggestion);
+    setShowSuggestions(false);
+    fetchBooks(sortField, sortDirection, { searchTerm: suggestion }, 1, pageSize);
+    setCurrentPage(1);
+    if (inputRef.current) inputRef.current.blur();
   };
 
   // Handle edit book
-  const handleEditBook = (book: Book) => {
+  const handleEdit = (book: Book) => {
+    console.log('Editing book:', book.title, book);
     setEditingBook(book);
     setShowModal(true);
   };
 
   // Handle delete book
-  const handleDeleteBook = (book: Book) => {
-    setBookToDelete(book);
-    setShowDeleteConfirm(true);
+  const handleDelete = (book: Book) => {
+    console.log('Deleting book:', book.title);
+    setSelectedBooks(new Set([book.id]));
+    setShowBatchDeleteConfirm(true);
   };
 
-  // Confirm delete book
-  const confirmDelete = async () => {
-    if (!bookToDelete) return;
-    
-    const { error } = await deleteBook(bookToDelete.id);
-    if (!error) {
-      await fetchBooks();
-      setShowDeleteConfirm(false);
-      setBookToDelete(null);
-    } else {
-      alert(`Error deleting review: ${error.message}`);
+  // Handle form submission
+  const handleSubmit = async (bookData: NewBook) => {
+    setIsSubmitting(true);
+    try {
+      console.log('Submitting book data:', bookData);
+      let bookToSubmit = { ...bookData };
+      // If sorting by review_date and review_date is not set, set it to today
+      if ((sortField === 'review_date' || !bookToSubmit.review_date) && !bookToSubmit.review_date) {
+        bookToSubmit.review_date = new Date().toISOString().split('T')[0];
+      }
+      if (editingBook) {
+        // Update existing book
+        console.log('Updating existing book:', editingBook.id);
+        const { data, error } = await updateBook(editingBook.id, bookToSubmit);
+        console.log('Update response:', { data, error });
+        if (error) throw error;
+        if (!data) throw new Error('No data returned from update');
+      } else {
+        // Create new book
+        console.log('Creating new book');
+        const { data, error } = await createBook(bookToSubmit);
+        console.log('Create response:', { data, error });
+        if (error) throw error;
+        if (!data) throw new Error('No data returned from create');
+      }
+      // Refresh the books list and close modal
+      console.log('Refreshing books list with params:', {
+        sortField,
+        sortDirection,
+        searchTerm,
+        currentPage,
+        pageSize
+      });
+      await fetchBooks(sortField, sortDirection, { searchTerm }, 1, pageSize);
+      setShowModal(false);
+      setEditingBook(null);
+    } catch (err) {
+      console.error('Error submitting book:', err);
+      alert('Failed to save book. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -179,8 +185,7 @@ export const Reviews = () => {
   const closeModal = () => {
     setShowModal(false);
     setEditingBook(null);
-    setShowDeleteConfirm(false);
-    setBookToDelete(null);
+    setShowBatchDeleteConfirm(false);
   };
 
   // Calculate total pages
@@ -209,114 +214,58 @@ export const Reviews = () => {
     fetchBooks(sortField, sortDirection, { searchTerm }, newPage, pageSize);
   };
 
+  // Handle book card click in select mode
+  const handleBookCardClick = (book: Book) => {
+    if (!selectMode) return;
+    setSelectedBooks(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(book.id)) {
+        newSet.delete(book.id);
+      } else {
+        newSet.add(book.id);
+      }
+      return newSet;
+    });
+  };
+
+  // Handle batch soft delete (move to trash)
+  const handleBatchSoftDelete = async () => {
+    if (selectedBooks.size === 0) {
+      alert('No books selected for deletion.');
+      return;
+    }
+    try {
+      const bookIds = Array.from(selectedBooks);
+      const now = new Date().toISOString();
+      console.log('Attempting to soft delete books:', bookIds);
+      for (const id of bookIds) {
+        const { error } = await supabase
+          .from('books')
+          .update({ deleted: true, deleted_at: now })
+          .eq('id', id);
+        console.log('Soft delete response for', id, error);
+        if (error) throw error;
+      }
+      await fetchBooks(sortField, sortDirection, { searchTerm }, currentPage, pageSize);
+      setSelectMode(false);
+      setSelectedBooks(new Set());
+      console.log('Soft delete complete, books refreshed.');
+    } catch (error) {
+      console.error('Error moving reviews to trash:', error);
+      alert('Error moving reviews to trash');
+    }
+  };
+
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-4xl font-bold">Book Reviews</h1>
-        <div className="flex space-x-2">
-          <AuthorizedAction>
-            <button
-              onClick={toggleSelectMode}
-              className={`px-4 py-2 rounded transition-colors ${
-                selectMode 
-                ? 'bg-gray-600 text-white hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-800' 
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
-              }`}
-            >
-              {selectMode ? 'Cancel' : 'Edit'}
-            </button>
-          </AuthorizedAction>
-          
-          {selectMode ? (
-            <button
-              onClick={handleBatchDelete}
-              disabled={selectedBooks.size === 0}
-              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:bg-red-700 dark:hover:bg-red-800"
-            >
-              Delete ({selectedBooks.size})
-            </button>
-          ) : (
-            <AuthorizedAction>
-              <button
-                onClick={() => setShowModal(true)}
-                className="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700 transition-colors dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent"
-              >
-                New Review
-              </button>
-            </AuthorizedAction>
-          )}
-        </div>
+      {/* Centered, elegant title */}
+      <div className="flex flex-col items-center mb-4">
+        <h1 className="text-5xl text-center mb-2" style={{ fontFamily: "'Allura', cursive" }}>Book Reviews</h1>
       </div>
-      {/* Modal for New/Edit Review */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-hidden">
-          <div className="bg-white dark:bg-gray-800 shadow-2xl rounded-2xl max-w-3xl w-full p-6 px-0 my-12 relative max-h-[80vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-white dark:scrollbar-thumb-maroon-card dark:scrollbar-track-gray-900">
-            <h2 className="text-2xl font-semibold font-serif italic text-center bg-transparent dark:bg-gray-800 py-1 rounded-t-2xl">
-              {editingBook ? 'Edit Book Review' : 'New Book Review'}
-            </h2>
-            <div className="h-1 w-24 bg-maroon-card rounded-full mx-auto mb-1"></div>
-            <BookForm 
-              initialData={editingBook || undefined}
-              onSubmit={handleBookSubmit} 
-              onCancel={closeModal} 
-              isSubmitting={isSubmitting} 
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && bookToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg max-w-md w-full p-6 relative">
-            <h3 className="text-lg font-semibold mb-2">Confirm Delete</h3>
-            <p className="mb-4">
-              Are you sure you want to delete the review for <span className="font-semibold">{bookToDelete.title}</span>? 
-              This action cannot be undone.
-            </p>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={closeModal}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Search and Filters */}
-      <div className="mb-6 flex flex-col md:flex-row items-stretch md:items-center gap-4">
-        <form onSubmit={handleSearch} className="flex-grow relative">
-          <div className="flex items-center relative rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm focus-within:ring-2 focus-within:ring-rose-300 dark:focus-within:ring-maroon-accent transition min-h-[44px]">
-            <span className="pl-2 text-gray-400 dark:text-gray-500 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 19l-4-4m0 0A7 7 0 1 0 5 5a7 7 0 0 0 10 10z" />
-              </svg>
-            </span>
-            <input
-              type="text"
-              placeholder="Search by title, author, or description"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-grow text-sm px-3 py-2 bg-transparent border-0 focus:ring-0 focus:outline-none dark:text-white rounded-full"
-            />
-            <button
-              type="submit"
-              className="text-sm rounded-full px-4 py-2 bg-rose-600 text-white hover:bg-rose-700 dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent focus:ring-2 focus:ring-rose-300 dark:focus:ring-maroon-accent transition ml-2 mr-2"
-            >
-              Search
-            </button>
-          </div>
-        </form>
-        <div className="flex items-center space-x-2">
+      {/* Search, filter, and actions row */}
+      <div className="mb-6 w-full flex flex-col md:flex-row items-stretch md:items-center gap-4">
+        {/* Sort (filter) selector on the left */}
+        <div className="flex items-center space-x-2 order-1">
           <div className="relative">
             <select
               id="sort"
@@ -325,10 +274,8 @@ export const Reviews = () => {
               className="text-sm rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 pr-6 py-2 focus:ring-2 focus:ring-rose-300 dark:focus:ring-maroon-accent transition cursor-pointer outline-none shadow-sm min-h-[44px] w-auto max-w-xs"
               style={{ WebkitAppearance: 'none', MozAppearance: 'none', appearance: 'none' }}
             >
-              <option value="created_at-desc">Newest First</option>
-              <option value="created_at-asc">Oldest First</option>
-              <option value="publish_date-desc">Publication Date (Newest First)</option>
-              <option value="publish_date-asc">Publication Date (Oldest First)</option>
+              <option value="review_date-desc">Newest First</option>
+              <option value="review_date-asc">Oldest First</option>
               <option value="title-asc">Title (A-Z)</option>
               <option value="title-desc">Title (Z-A)</option>
               <option value="author-asc">Author (A-Z)</option>
@@ -343,6 +290,105 @@ export const Reviews = () => {
             </div>
           </div>
         </div>
+        {/* Search bar in the middle, stretches to fill */}
+        <form onSubmit={handleSearch} className="flex-grow order-2 relative">
+          <div className="flex items-center relative rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm focus-within:ring-2 focus-within:ring-rose-300 dark:focus-within:ring-maroon-accent transition min-h-[44px]">
+            <span className="pl-2 text-gray-400 dark:text-gray-500 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 19l-4-4m0 0A7 7 0 1 0 5 5a7 7 0 0 0 10 10z" />
+              </svg>
+            </span>
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="Search by title, author, or description"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
+              className="flex-grow text-sm px-3 py-2 bg-transparent border-0 focus:ring-0 focus:outline-none dark:text-white rounded-full"
+              autoComplete="off"
+            />
+            <button
+              type="submit"
+              className="text-sm rounded-full px-4 py-2 bg-rose-600 text-white hover:bg-rose-700 dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent focus:ring-2 focus:ring-rose-300 dark:focus:ring-maroon-accent transition ml-2 mr-2"
+            >
+              Search
+            </button>
+          </div>
+          {/* Suggestions dropdown */}
+          {showSuggestions && suggestions.length > 0 && (
+            <ul className="absolute left-0 right-0 z-20 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-b-xl shadow-lg mt-1 max-h-60 overflow-y-auto">
+              {suggestions.slice(0, 8).map((book) => (
+                <li
+                  key={book.id}
+                  className="px-4 py-2 cursor-pointer hover:bg-rose-50 dark:hover:bg-maroon-accent/30 text-left"
+                  onMouseDown={() => handleSuggestionClick(book.title)}
+                >
+                  <span className="font-semibold">{book.title}</span>
+                  {book.author && (
+                    <span className="text-gray-500 dark:text-gray-400 ml-2 text-sm">by {book.author}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </form>
+        {/* Edit/New Review Buttons on the right */}
+        <AuthorizedAction>
+        <div className="flex items-center space-x-2 order-3">
+          <button
+            onClick={e => {
+              e.stopPropagation();
+              setSelectMode(!selectMode);
+              setSelectedBooks(new Set());
+            }}
+            className={`p-2 rounded-full transition-colors ${
+              selectMode
+                ? 'bg-rose-100 dark:bg-maroon-accent'
+                : 'hover:bg-gray-200 dark:hover:bg-gray-700'
+            } focus:outline-none focus:ring-2 focus:ring-rose-300 dark:focus:ring-maroon-accent`}
+            aria-label={selectMode ? 'Cancel' : 'Edit'}
+            title={selectMode ? 'Cancel' : 'Edit'}
+          >
+            {selectMode ? (
+              <FiX className="w-6 h-6 text-rose-600 dark:text-maroon-card" />
+            ) : (
+              <FiEdit2 className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+            )}
+          </button>
+          {selectMode ? (
+            <button
+              onClick={e => {
+                e.stopPropagation();
+                handleBatchSoftDelete();
+              }}
+              className="p-2 rounded-full transition-colors bg-red-100 dark:bg-red-700 hover:bg-red-200 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-300 dark:focus:ring-red-800"
+              aria-label="Move to Trash"
+              title="Move to Trash"
+              disabled={selectedBooks.size === 0}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 text-red-600 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2" /></svg>
+            </button>
+          ) : (
+            <button
+              onClick={e => {
+                e.stopPropagation();
+                setShowModal(true);
+                setEditingBook(null);
+              }}
+              className="p-2 rounded-full transition-colors hover:bg-rose-100 dark:hover:bg-maroon-accent focus:outline-none focus:ring-2 focus:ring-rose-300 dark:focus:ring-maroon-accent"
+              aria-label="New Review"
+              title="New Review"
+            >
+              <FiPlusCircle className="w-7 h-7 text-rose-600 dark:text-maroon-card" />
+            </button>
+          )}
+        </div>
+        </AuthorizedAction>
       </div>
       {/* Loading, Error and Count States */}
       {loading && (
@@ -361,14 +407,17 @@ export const Reviews = () => {
       {!loading && !error && books.length === 0 && (
         <div className="text-center py-8">
           <p className="text-gray-600 dark:text-gray-400 mb-4">No reviews found.</p>
-          <AuthorizedAction>
+          {isAuthenticated && (
             <button
-              onClick={() => setShowModal(true)}
+              onClick={() => {
+                setShowModal(true);
+                setEditingBook(null);
+              }}
               className="px-4 py-2 bg-rose-600 text-white rounded hover:bg-rose-700 transition-colors dark:bg-maroon-card dark:text-maroon-text dark:hover:bg-maroon-accent"
             >
               Add the First Review
             </button>
-          </AuthorizedAction>
+          )}
         </div>
       )}
 
@@ -377,14 +426,16 @@ export const Reviews = () => {
           <p className="text-gray-700 dark:text-gray-300 mb-4">
             Found {totalCount} {totalCount === 1 ? 'review' : 'reviews'}
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm p-2">
             {books.map((book) => (
-              <BookCard 
+              <BookCard
                 key={book.id}
-                book={book} 
-                onEdit={() => handleEditBook(book)}
-                onDelete={() => handleDeleteBook(book)}
+                book={book}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
                 selectMode={selectMode}
+                selected={selectedBooks.has(book.id)}
+                onCardClick={handleBookCardClick}
               />
             ))}
           </div>
@@ -459,7 +510,7 @@ export const Reviews = () => {
                 Cancel
               </button>
               <button
-                onClick={confirmBatchDelete}
+                onClick={handleBatchDelete}
                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
               >
                 Delete
@@ -468,6 +519,20 @@ export const Reviews = () => {
           </div>
         </div>
       )}
+
+      {/* Edit/New Review Modal */}
+      <Modal
+        isOpen={showModal}
+        onClose={closeModal}
+        title={editingBook ? "Edit Book Review" : "New Book Review"}
+      >
+        <BookForm
+          initialData={editingBook || undefined}
+          onSubmit={handleSubmit}
+          onCancel={closeModal}
+          isSubmitting={isSubmitting}
+        />
+      </Modal>
     </div>
   );
 }; 

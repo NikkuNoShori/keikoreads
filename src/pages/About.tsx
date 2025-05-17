@@ -3,9 +3,16 @@
 export const About = () => {
   return (
     <div className="w-full">
+      {/* Title section - edge to edge and centered */}
+      <div className="w-full bg-white/80 dark:bg-gray-800/80 mb-4">
+        <div className="flex flex-col items-center">
+          <h1 className="text-5xl text-center mb-2" style={{ fontFamily: "'Allura', cursive" }}>About Me</h1>
+        </div>
+      </div>
+
+      {/* Main content */}
       <div className="flex flex-col md:flex-row gap-8">
-        <div className="flex-1 max-w-md">
-          <h1 className="text-3xl text-gray-600 mb-4">About Me</h1>
+        <div className="flex-1 max-w-2xl">
           <div className="prose dark:prose-invert">
             <p className="mb-4">
               Hey there! I'm Alisha Neal—a book lover, ARC reviewer, and the voice behind this cozy little corner

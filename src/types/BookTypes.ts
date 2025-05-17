@@ -31,7 +31,7 @@ export interface BookFormData extends Omit<NewBook, 'review_date'> {
   publish_date?: string; // Format: YYYY-MM-DD
 }
 
-export type BookSortField = 'title' | 'author' | 'rating' | 'created_at' | 'review_date' | 'publish_date';
+export type BookSortField = 'title' | 'author' | 'rating' | 'created_at' | 'review_date';
 export type SortDirection = 'asc' | 'desc';
 
 export interface BookFilters {
@@ -39,6 +39,8 @@ export interface BookFilters {
   author?: string;
   rating?: number;
   searchTerm?: string;
+  deleted?: boolean;
+  includeDeleted?: boolean;
 }
 
 export interface ExternalLinks {

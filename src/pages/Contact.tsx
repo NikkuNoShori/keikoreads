@@ -19,9 +19,14 @@ export const Contact = () => {
 
   return (
     <div className="w-full">
-      <div className="flex flex-col md:flex-row gap-8">
+      {/* Title section - edge to edge and centered */}
+      <div className="flex flex-col items-center mb-4">
+        <h1 className="text-5xl mb-6 text-center" style={{ fontFamily: "'Allura', cursive" }}>Get in Touch</h1>
+      </div>
+
+      {/* Main content */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="flex-1">
-          <h1 className="text-3xl text-gray-600 mb-4 italic">Get in Touch</h1>
           <p className="mb-6">
             I'd love to hear from you! Whether you're a publisher, author, or fellow book lover,
             feel free to reach out through the form or connect with me on social media.

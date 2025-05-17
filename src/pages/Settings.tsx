@@ -206,6 +206,16 @@ export const Settings = () => {
                 >
                   Account
                 </button>
+                <button
+                  onClick={() => setActiveTab('trash')}
+                  className={`text-left px-4 py-2 rounded-md ${
+                    activeTab === 'trash'
+                      ? 'bg-rose-100 text-rose-700 dark:bg-gray-700 dark:text-rose-400'
+                      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  Trash Bin
+                </button>
               </div>
             </div>
           </div>
@@ -340,6 +350,13 @@ export const Settings = () => {
                       Delete Account
                     </button>
                   </div>
+                </div>
+              )}
+              {activeTab === 'trash' && (
+                <div>
+                  <h2 className="text-xl font-semibold mb-6">Trash Bin</h2>
+                  {/* Trash Bin Table will be implemented here */}
+                  <div id="trash-bin-table-placeholder" className="text-gray-500 dark:text-gray-400">Loading deleted books...</div>
                 </div>
               )}
             </div>

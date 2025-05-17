@@ -61,6 +61,20 @@ export const useBooks = (
       pageToUse: number = currentPage,
       pageSizeToUse: number = pageSize
     ) => {
+      // Always exclude deleted books unless filtersToUse.includeDeleted is true
+      let effectiveFilters = { ...filtersToUse };
+      if (!(effectiveFilters as any).includeDeleted) {
+        effectiveFilters = { ...effectiveFilters, deleted: false };
+      }
+
+      console.log('[useBooks] fetchBooks called with:', {
+        sortFieldToUse,
+        sortDirectionToUse,
+        effectiveFilters,
+        pageToUse,
+        pageSizeToUse
+      });
+
       // Clear any existing debounce timer
       if (debounceTimer.current) {
         clearTimeout(debounceTimer.current);
@@ -70,7 +84,7 @@ export const useBooks = (
       const currentParams = {
         sortField: sortFieldToUse,
         sortDirection: sortDirectionToUse,
-        filters: filtersToUse,
+        filters: effectiveFilters,
         page: pageToUse,
         pageSize: pageSizeToUse,
       };
@@ -83,8 +97,8 @@ export const useBooks = (
         JSON.stringify(lastFetchParams.current.filters) !==
           JSON.stringify(currentParams.filters);
 
-      // If parameters haven't changed and we've already loaded data, don't fetch again
-      if (!paramsChanged && initialLoadCompleted.current && books.length > 0) {
+      // Only skip fetch if parameters haven't changed AND we've already loaded data
+      if (!paramsChanged && initialLoadCompleted.current) {
         return;
       }
 
@@ -95,13 +109,15 @@ export const useBooks = (
       debounceTimer.current = setTimeout(async () => {
         setLoading(true);
         try {
+          console.log('[useBooks] About to call bookService.getBooks');
           const { data, count, error } = await bookService.getBooks(
             sortFieldToUse,
             sortDirectionToUse,
-            filtersToUse,
+            effectiveFilters,
             pageToUse,
             pageSizeToUse
           );
+          console.log('[useBooks] bookService.getBooks response:', { data, count, error });
 
           if (error) {
             setError(error);

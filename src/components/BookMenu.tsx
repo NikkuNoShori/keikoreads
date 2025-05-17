@@ -18,12 +18,14 @@ export const BookMenu = ({ book, onEdit, onDelete }: BookMenuProps) => {
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
+    console.log('BookMenu: Edit clicked for', book.title);
     onEdit(book);
     setIsOpen(false);
   };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
+    console.log('BookMenu: Delete clicked for', book.title);
     onDelete(book);
     setIsOpen(false);
   };

@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { getBookById } from './utils/bookService';
 import { slugify } from './utils/formatters';
+import FontTest from './pages/FontTest';
 
 // Create a verification notice page
 const VerifyEmail = () => (
@@ -109,5 +110,8 @@ export const AppRoutes = () => (
     
     {/* Catch all - 404 */}
     <Route path="*" element={<NotFound />} />
+
+    {/* New route for FontTest */}
+    <Route path="/fonttest" element={<FontTest />} />
   </Routes>
 ); 
