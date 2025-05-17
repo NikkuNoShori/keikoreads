@@ -317,4 +317,6 @@ export const ReviewDetail = () => {
       )}
     </>
   );
-}; 
+};
+
+export default ReviewDetail; 

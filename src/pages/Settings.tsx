@@ -457,4 +457,6 @@ export const Settings = () => {
       </div>
     </ProtectedRoute>
   );
-}; 
+};
+
+export default Settings; 

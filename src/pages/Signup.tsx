@@ -238,4 +238,6 @@ export const Signup = () => {
       </div>
     </AuthLayout>
   );
-}; 
+};
+
+export default Signup; 

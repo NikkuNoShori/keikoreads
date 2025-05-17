@@ -146,7 +146,7 @@ export const Login = () => {
     >
       {oauthNotice && (
         <div className="mb-4 p-3 bg-blue-100 border border-blue-400 text-blue-700 rounded dark:bg-blue-900 dark:text-blue-200">
-          You signed up with Google. Please use “Sign in with Google” to log in.
+          You signed up with Google. Please use "Sign in with Google" to log in.
         </div>
       )}
       {error && (
@@ -253,4 +253,6 @@ export const Login = () => {
       </div>
     </AuthLayout>
   );
-}; 
+};
+
+export default Login; 

@@ -275,7 +275,7 @@ export const Reviews = () => {
               id="sort"
               value={`${sortField}-${sortDirection}`}
               onChange={handleSortChange}
-              className="text-sm rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 pr-6 py-2 focus:ring-2 focus:ring-rose-300 dark:focus:ring-maroon-accent transition cursor-pointer outline-none shadow-sm min-h-[44px] w-auto max-w-xs"
+              className="text-sm rounded-full border border-gray-300 dark:border-white bg-white dark:bg-transparent px-2 pr-6 py-2 focus:ring-0 focus:outline-none transition cursor-pointer outline-none shadow-sm min-h-[44px] w-auto max-w-xs"
               style={{ WebkitAppearance: 'none', MozAppearance: 'none', appearance: 'none' }}
             >
               <option value="review_date-desc">Newest First</option>
@@ -296,7 +296,7 @@ export const Reviews = () => {
         </div>
         {/* Search bar in the middle, stretches to fill */}
         <form onSubmit={handleSearch} className="flex-grow order-2 relative">
-          <div className="flex items-center relative rounded-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm focus-within:ring-2 focus-within:ring-rose-300 dark:focus-within:ring-maroon-accent transition min-h-[44px]">
+          <div className="flex items-center relative rounded-full border border-gray-300 dark:border-white bg-white dark:bg-transparent shadow-sm focus-within:ring-0 focus-within:outline-none transition min-h-[44px]">
             <span className="pl-2 text-gray-400 dark:text-gray-500 flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 19l-4-4m0 0A7 7 0 1 0 5 5a7 7 0 0 0 10 10z" />
@@ -438,69 +438,73 @@ export const Reviews = () => {
           <p className="text-gray-700 dark:text-gray-300 mb-4">
             Found {totalCount} {totalCount === 1 ? 'review' : 'reviews'}
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm p-2">
-            {books.map((book) => (
-              <BookCard
-                key={book.id}
-                book={book}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                selectMode={selectMode}
-                selected={selectedBooks.has(book.id)}
-                onCardClick={handleBookCardClick}
-              />
-            ))}
-          </div>
-          {/* Unified, centered pagination and results-per-page control */}
-          <div className="flex flex-col items-center mt-8">
-            <div className="flex items-center space-x-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2 shadow-sm">
-              {/* Previous button */}
-              {resultsPerPage !== 'All' && (
-                <button
-                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className="px-1.5 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 transition hover:bg-rose-100 dark:hover:bg-maroon-accent focus:ring-2 focus:ring-rose-300 dark:focus:ring-maroon-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                  aria-label="Previous page"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                  </svg>
-                </button>
-              )}
-              {/* Results per page dropdown */}
-              <select
-                id="results-per-page"
-                value={resultsPerPage}
-                onChange={handleResultsPerPageChange}
-                className="text-xs px-2 py-1 bg-white text-gray-800 border-none focus:ring-2 focus:ring-rose-300 dark:focus:ring-maroon-accent rounded-full cursor-pointer outline-none transition"
-                style={{ colorScheme: 'light' }}
-              >
-                {resultsPerPageOptions.map((option) => (
-                  <option key={option} value={option}>{option === 'All' ? 'All' : option}</option>
+          <div className="w-full flex flex-col items-center">
+            <div className="w-full max-w-7xl mx-auto rounded-2xl shadow-sm p-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
+                {books.map((book) => (
+                  <BookCard
+                    key={book.id}
+                    book={book}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    selectMode={selectMode}
+                    selected={selectedBooks.has(book.id)}
+                    onCardClick={handleBookCardClick}
+                  />
                 ))}
-              </select>
-              {/* Next button */}
-              {resultsPerPage !== 'All' && (
-                <button
-                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                  className="px-1.5 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 transition hover:bg-rose-100 dark:hover:bg-maroon-accent focus:ring-2 focus:ring-rose-300 dark:focus:ring-maroon-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                  aria-label="Next page"
+              </div>
+            </div>
+            {/* Unified, centered pagination and results-per-page control */}
+            <div className="flex flex-col items-center mt-8">
+              <div className="flex items-center space-x-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2 shadow-sm">
+                {/* Previous button */}
+                {resultsPerPage !== 'All' && (
+                  <button
+                    onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className="px-1.5 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 transition hover:bg-rose-100 dark:hover:bg-maroon-accent focus:ring-2 focus:ring-rose-300 dark:focus:ring-maroon-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    aria-label="Previous page"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                  </button>
+                )}
+                {/* Results per page dropdown */}
+                <select
+                  id="results-per-page"
+                  value={resultsPerPage}
+                  onChange={handleResultsPerPageChange}
+                  className="text-xs px-2 py-1 bg-white text-gray-800 border-none focus:ring-2 focus:ring-rose-300 dark:focus:ring-maroon-accent rounded-full cursor-pointer outline-none transition"
+                  style={{ colorScheme: 'light' }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                  </svg>
-                </button>
+                  {resultsPerPageOptions.map((option) => (
+                    <option key={option} value={option}>{option === 'All' ? 'All' : option}</option>
+                  ))}
+                </select>
+                {/* Next button */}
+                {resultsPerPage !== 'All' && (
+                  <button
+                    onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-1.5 py-1 text-xs rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 transition hover:bg-rose-100 dark:hover:bg-maroon-accent focus:ring-2 focus:ring-rose-300 dark:focus:ring-maroon-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    aria-label="Next page"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              {/* Page indicator below pagination */}
+              {resultsPerPage !== 'All' && (
+                <div className="w-full flex justify-center mt-1">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                </div>
               )}
             </div>
-            {/* Page indicator below pagination */}
-            {resultsPerPage !== 'All' && (
-              <div className="w-full flex justify-center mt-1">
-                <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">
-                  Page {currentPage} of {totalPages}
-                </span>
-              </div>
-            )}
           </div>
         </>
       )}
@@ -551,4 +555,6 @@ export const Reviews = () => {
       </Modal>
     </div>
   );
-}; 
+};
+
+export default Reviews; 

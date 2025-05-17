@@ -66,7 +66,7 @@ export const BookCard = ({
       className={`flex flex-col bg-white dark:bg-maroon-container shadow-md rounded overflow-hidden transition-all duration-300 hover:shadow-lg group w-[85%] mx-auto ${selectMode && selected ? 'ring-4 ring-rose-400 dark:ring-maroon-accent' : ''} ${selectMode ? 'cursor-pointer' : ''}`}
       onClick={handleCardClick}
     >
-      <div className="h-[340px] relative bg-gray-100 dark:bg-gray-700 rounded shadow overflow-hidden">
+      <div className="aspect-[2/3] relative bg-gray-100 dark:bg-gray-700 rounded shadow overflow-hidden">
         {(onEdit || onDelete) && !selectMode && (
           <div className="absolute top-2 right-2 z-20" onClick={e => e.stopPropagation()}>
             <AuthorizedAction>

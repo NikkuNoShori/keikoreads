@@ -1,20 +1,20 @@
-import { Routes, Route } from 'react-router-dom';
-import { Home } from './pages/Home';
-import { About } from './pages/About';
-import { Reviews } from './pages/Reviews';
-import { Contact } from './pages/Contact';
-import { Login } from './pages/Login';
-import { Signup } from './pages/Signup';
-import { AuthCallback } from './pages/AuthCallback';
-import { Settings } from './pages/Settings';
+import { Routes, Route, useParams, Navigate } from 'react-router-dom';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { SmartLink } from './components/SmartLink';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { ReviewDetail } from './pages/ReviewDetail';
-import { useEffect, useState } from 'react';
-import { useParams, Navigate } from 'react-router-dom';
 import { getBookById } from './utils/bookService';
 import { slugify } from './utils/formatters';
-import FontTest from './pages/FontTest';
+
+const Home = lazy(() => import('./pages/Home'));
+const About = lazy(() => import('./pages/About'));
+const Reviews = lazy(() => import('./pages/Reviews'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Login = lazy(() => import('./pages/Login'));
+const Signup = lazy(() => import('./pages/Signup'));
+const AuthCallback = lazy(() => import('./pages/AuthCallback'));
+const Settings = lazy(() => import('./pages/Settings'));
+const ReviewDetail = lazy(() => import('./pages/ReviewDetail'));
+const FontTest = lazy(() => import('./pages/FontTest'));
 
 // Create a verification notice page
 const VerifyEmail = () => (
@@ -64,54 +64,56 @@ const RedirectToSlug = () => {
 };
 
 export const AppRoutes = () => (
-  <Routes>
-    {/* Public Routes */}
-    <Route path="/" element={<Home />} />
-    <Route path="/about" element={<About />} />
-    <Route path="/contact" element={<Contact />} />
-    
-    {/* Authentication Routes */}
-    <Route path="/login" element={<Login />} />
-    <Route path="/signup" element={<Signup />} />
-    <Route path="/auth/callback" element={<AuthCallback />} />
-    <Route path="/verify-email" element={<VerifyEmail />} />
-    
-    {/* Protected Routes */}
-    <Route 
-      path="/settings" 
-      element={
-        <ProtectedRoute requireAuth={true}>
-          <Settings />
-        </ProtectedRoute>
-      } 
-    />
-    
-    {/* Both public access and secure operations */}
-    <Route 
-      path="/reviews" 
-      element={
-        <ProtectedRoute requireAuth={false}>
-          <Reviews />
-        </ProtectedRoute>
-      } 
-    />
-    <Route 
-      path="/reviews/:slug"
-      element={
-        <ProtectedRoute requireAuth={false}>
-          <ReviewDetail />
-        </ProtectedRoute>
-      }
-    />
-    <Route
-      path="/reviews/:id"
-      element={<RedirectToSlug />}
-    />
-    
-    {/* Catch all - 404 */}
-    <Route path="*" element={<NotFound />} />
+  <Suspense fallback={<div className="w-full text-center py-20 text-lg">Loading...</div>}>
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<Home />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
+      
+      {/* Authentication Routes */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
+      
+      {/* Protected Routes */}
+      <Route 
+        path="/settings" 
+        element={
+          <ProtectedRoute requireAuth={true}>
+            <Settings />
+          </ProtectedRoute>
+        } 
+      />
+      
+      {/* Both public access and secure operations */}
+      <Route 
+        path="/reviews" 
+        element={
+          <ProtectedRoute requireAuth={false}>
+            <Reviews />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/reviews/:slug"
+        element={
+          <ProtectedRoute requireAuth={false}>
+            <ReviewDetail />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/reviews/:id"
+        element={<RedirectToSlug />}
+      />
+      
+      {/* Catch all - 404 */}
+      <Route path="*" element={<NotFound />} />
 
-    {/* New route for FontTest */}
-    <Route path="/fonttest" element={<FontTest />} />
-  </Routes>
+      {/* New route for FontTest */}
+      <Route path="/fonttest" element={<FontTest />} />
+    </Routes>
+  </Suspense>
 ); 
